@@ -1,11 +1,10 @@
 const express = require("express");
+const fs = require("fs");
 const multer = require("multer");
 const cors = require("cors");
 
 const app = express();
 const port = 8000;
-
-app.use(cors());
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -18,14 +17,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).array("file");
 
+app.use(cors());
+
 app.post("/upload", function (req, res) {
-  upload(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      return res.status(500).json(err);
-    } else if (err) {
-      return res.status(500).json(err);
+  fs.access("./uploads", (error) => {
+    if (error) {
+      fs.mkdirSync("./uploads");
     }
-    return res.status(200).send(req.file);
+    upload(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        return res.status(500).json(err);
+      } else if (err) {
+        return res.status(500).json(err);
+      }
+      return res.status(200).send(req.file);
+    });
   });
 });
 
