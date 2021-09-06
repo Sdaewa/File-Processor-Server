@@ -3,7 +3,6 @@ const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
-const mime = require("mime-types");
 require("dotenv").config({ path: ".env" });
 
 const CloudmersiveConvertApiClient = require("cloudmersive-convert-api-client");
@@ -87,7 +86,16 @@ const filesPath = path.join(__dirname + "/files");
 
 app.get("/convert", (req, res) => {
   const { filename } = req.query;
-  console.log(filename);
+  // console.log(filename);
+
+  // var scriptName = path.basename("./files" + __filename);
+  // console.log(scriptName);
+
+  // const files = fs.readdirSync("./files", __filename);
+
+  // for (const file of files) {
+  //   console.log(file);
+  // }
   const inputPath = path.resolve(__dirname, `./files/${filename}`);
 
   console.log(inputPath);
@@ -98,6 +106,9 @@ app.get("/convert", (req, res) => {
       console.error(error);
     } else {
       console.log("API called successfully. Returned data: " + data);
+      const encoded = new Buffer.from(data).toString("base64");
+      var enconded = fs.createWriteStream(inputPath);
+      console.log("enconded=>", enconded);
     }
   };
 
@@ -121,3 +132,82 @@ app.post("/", (req, res) => {
 });
 
 app.listen(port, () => console.log("Server connected"));
+
+// const libre = require("libreoffice-convert");
+
+// var outputFilePath;
+
+// app.use(express.urlencoded({ extended: false }));
+// app.use(express.json());
+
+// const PORT = process.env.PORT || 8000;
+
+// app.use(express.static("files"));
+
+// var storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "/files");
+//   },
+//   filename: function (req, file, cb) {
+//     cb(
+//       null,
+//       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+//     );
+//   },
+// });
+
+// app.get("/convert", (req, res) => {
+//   res.send("docxtopdfdemo", {
+//     title: "DOCX to PDF Converter - Free Media Tools",
+//   });
+// });
+
+// const docxtopdfdemo = function (req, file, callback) {
+//   var ext = path.extname(file.originalname);
+//   if (ext !== ".docx" && ext !== ".doc") {
+//     return callback("This Extension is not supported");
+//   }
+//   callback(null, true);
+// };
+
+// const docxtopdfdemoupload = multer({
+//   storage: storage,
+//   fileFilter: docxtopdfdemo,
+// });
+
+// app.post("/convert", docxtopdfdemoupload.single("file"), (req, res) => {
+//   if (req.file) {
+//     console.log(req.file.path);
+
+//     const file = fs.readFileSync(req.file.path);
+
+//     outputFilePath = Date.now() + "output.pdf";
+
+//     libre.convert(file, ".pdf", undefined, (err, done) => {
+//       if (err) {
+//         fs.unlinkSync(req.file.path);
+//         fs.unlinkSync(outputFilePath);
+
+//         res.send("some error taken place in conversion process");
+//       }
+
+//       fs.writeFileSync(outputFilePath, done);
+
+//       res.download(outputFilePath, (err) => {
+//         if (err) {
+//           fs.unlinkSync(req.file.path);
+//           fs.unlinkSync(outputFilePath);
+
+//           res.send("some error taken place in downloading the file");
+//         }
+
+//         fs.unlinkSync(req.file.path);
+//         fs.unlinkSync(outputFilePath);
+//       });
+//     });
+//   }
+// });
+
+// app.listen(PORT, () => {
+//   console.log(`App is listening on Port ${PORT}`);
+// });
