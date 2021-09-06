@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Sdaewa/compressor_server#readme",
   "dependencies": {
     "axios": "^0.21.1",
+    "base64topdf": "^1.1.8",
     "cloudmersive-convert-api-client": "^2.6.9",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
+const base64 = require("base64topdf");
 require("dotenv").config({ path: ".env" });
 
 const CloudmersiveConvertApiClient = require("cloudmersive-convert-api-client");
@@ -85,17 +86,10 @@ const filesPath = path.join(__dirname + "/files");
 // });
 
 app.get("/convert", (req, res) => {
+  res.setHeader({ responseType: "arrayBuffer", responseEnconding: "binary" });
+
   const { filename } = req.query;
-  // console.log(filename);
 
-  // var scriptName = path.basename("./files" + __filename);
-  // console.log(scriptName);
-
-  // const files = fs.readdirSync("./files", __filename);
-
-  // for (const file of files) {
-  //   console.log(file);
-  // }
   const inputPath = path.resolve(__dirname, `./files/${filename}`);
 
   console.log(inputPath);
@@ -106,11 +100,17 @@ app.get("/convert", (req, res) => {
       console.error(error);
     } else {
       console.log("API called successfully. Returned data: " + data);
-      const encoded = new Buffer.from(data).toString("base64");
-      var enconded = fs.createWriteStream(inputPath);
-      console.log("enconded=>", enconded);
+      const enconded = new Buffer.from(data).toString("base64");
+      // console.log("enconded=>", enconded);
+      // console.log("ENCO=>", ENCONDED);
+      return enconded;
     }
+    // var enconded = fs.createWriteStream(inputPath);
   };
+
+  let decodedBase64 = base64.base64Decode("base64Str", encoded);
+
+  console.log(decodedBase64);
 
   apiInstance.convertDocumentAutodetectToPdf(inputFile, callback);
 });
