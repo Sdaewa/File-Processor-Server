@@ -15,14 +15,25 @@ const storage = multer.diskStorage({
     cb(null, "files");
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname);
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
   },
 });
 
+const pathTo = path.resolve(__dirname, "files");
+
+const fileArr = fs.readdirSync(pathTo);
+const fileNameExt = fileArr[0];
+const fileName = path.basename(fileNameExt, ".doc" || ".docx");
+
 const extend = ".pdf";
-const enterPath = path.join(__dirname, "/files/sample.doc");
-const outputPath = path.join(__dirname, `/files/example${extend}`);
-console.log(enterPath);
+const enterPath = path.join(__dirname, `/files/${fileNameExt}`);
+const outputPath = path.join(__dirname, `/files/${fileName}${extend}`);
+
+console.log(outputPath);
+
 const upload = multer({ storage: storage }).single("file");
 
 app.use(cors());
