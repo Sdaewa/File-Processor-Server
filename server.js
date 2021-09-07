@@ -4,14 +4,8 @@ const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
 const base64 = require("base64topdf");
+const libre = require("libreoffice-convert");
 require("dotenv").config({ path: ".env" });
-
-const CloudmersiveConvertApiClient = require("cloudmersive-convert-api-client");
-const defaultClient = CloudmersiveConvertApiClient.ApiClient.instance;
-const Apikey = defaultClient.authentications["Apikey"];
-Apikey.apiKey = process.env.API_KEY;
-
-const apiInstance = new CloudmersiveConvertApiClient.ConvertDocumentApi();
 
 const app = express();
 const port = 8000;
@@ -25,94 +19,34 @@ const storage = multer.diskStorage({
   },
 });
 
-// const fileFilter = (req, file, cb) => {
-//   if (
-//     file.mimetype === "application/msword" ||
-//     file.mimetype === "application/vnd.ms-word.document.macroEnabled.12" ||
-//     file.mimetype ===
-//       "	application/vnd.openxmlformats-officedocument.wordprocessingml.template" ||
-//     file.mimetype ===
-//       "	application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-//     file.mimetype === "application/pdf"
-//   ) {
-//     cb(null, true);
-//   } else {
-//     cb(null, false);
-//   }
-// };
-
+const extend = ".pdf";
+const enterPath = path.join(__dirname, "/files/sample.doc");
+const outputPath = path.join(__dirname, `/files/example${extend}`);
+console.log(enterPath);
 const upload = multer({ storage: storage }).single("file");
 
 app.use(cors());
 
-app.use("/files", express.static("files"));
-
 const filesPath = path.join(__dirname + "/files");
-
-// app.get("/convert", (req, res) => {
-//   console.log(filename);
-//   //   let ext = path.parse(filename).ext;
-
-//   //   if (ext === ".pdf") {
-//   //     res.statusCode = 500;
-//   //     res.end(`File is already PDF.`);
-//   //   }
-
-//   const convertToPdf = async () => {
-//     const pdfdoc = await PDFNet.PDFDoc.create();
-//     await pdfdoc.initSecurityHandler();
-//     await PDFNet.Convert.toPdf(pdfdoc, inputPath);
-//     pdfdoc.save(outputPath, PDFNet.SDFDoc.SaveOptions.e_linearized);
-//   };
-
-//   PDFNet.runWithCleanup(convertToPdf, process.env.API_KEY)
-//     .then(() => {
-//       fs.readFile((e, data) => {
-//         if (e) {
-//           res.status(500);
-//           res.send(e);
-//         } else {
-//   res.setHeader({ "Content-Type": "application/pdf" });
-//   res.send({ data });
-//           PDFNet.shutdown();
-//         }
-//       });
-//     })
-//     .catch((e) => {
-//       res.status(500);
-//       res.send(e);
-//       console.log(e);
-//     });
-// });
+console.log(filesPath);
 
 app.get("/convert", (req, res) => {
-  res.setHeader({ responseType: "arrayBuffer", responseEnconding: "binary" });
-
-  const { filename } = req.query;
-
-  const inputPath = path.resolve(__dirname, `./files/${filename}`);
-
-  console.log(inputPath);
-  const inputFile = inputPath; // File | Input file to perform the operation on.
-
-  const callback = (error, data, req, res) => {
-    if (error) {
-      console.error(error);
-    } else {
-      console.log("API called successfully. Returned data: " + data);
-      const enconded = new Buffer.from(data).toString("base64");
-      // console.log("enconded=>", enconded);
-      // console.log("ENCO=>", ENCONDED);
-      return enconded;
+  console.log(req);
+  // Read file
+  const file = fs.readFileSync(enterPath);
+  console.log(file);
+  // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+  libre.convert(file, extend, undefined, (err, done) => {
+    if (err) {
+      console.log(`Error converting file: ${err}`);
     }
-    // var enconded = fs.createWriteStream(inputPath);
-  };
 
-  let decodedBase64 = base64.base64Decode("base64Str", encoded);
+    // Here in done you have pdf file which you can save or transfer in another stream
+    fs.writeFileSync(outputPath, done);
+    console.log(done);
 
-  console.log(decodedBase64);
-
-  apiInstance.convertDocumentAutodetectToPdf(inputFile, callback);
+    process.exit();
+  });
 });
 
 app.post("/", (req, res) => {
@@ -126,7 +60,10 @@ app.post("/", (req, res) => {
       } else if (err) {
         return res.status(500).json(err);
       }
-      return res.status(200).send(req.file);
+      res.status(200).send(req.file);
+      // console.log(req);
+      // console.log(req.file);
+      // console.log(req.headers);
     });
   });
 });
@@ -135,7 +72,7 @@ app.listen(port, () => console.log("Server connected"));
 
 // const libre = require("libreoffice-convert");
 
-// var outputFilePath;
+// let outputFilePath;
 
 // app.use(express.urlencoded({ extended: false }));
 // app.use(express.json());
@@ -156,13 +93,7 @@ app.listen(port, () => console.log("Server connected"));
 //   },
 // });
 
-// app.get("/convert", (req, res) => {
-//   res.send("docxtopdfdemo", {
-//     title: "DOCX to PDF Converter - Free Media Tools",
-//   });
-// });
-
-// const docxtopdfdemo = function (req, file, callback) {
+// const docToPdf = function (req, file, callback) {
 //   var ext = path.extname(file.originalname);
 //   if (ext !== ".docx" && ext !== ".doc") {
 //     return callback("This Extension is not supported");
@@ -170,16 +101,22 @@ app.listen(port, () => console.log("Server connected"));
 //   callback(null, true);
 // };
 
-// const docxtopdfdemoupload = multer({
+// const docUpload = multer({
 //   storage: storage,
-//   fileFilter: docxtopdfdemo,
+//   fileFilter: docToPdf,
 // });
 
-// app.post("/convert", docxtopdfdemoupload.single("file"), (req, res) => {
+// app.get("/convert", docUpload.single("file"), (req, res) => {
+//   const { filename } = req.query;
+
+//   const inputPath = path.resolve(__dirname, `./files/${filename}`);
+//   console.log(inputPath);
+//   console.log(req);
 //   if (req.file) {
 //     console.log(req.file.path);
 
 //     const file = fs.readFileSync(req.file.path);
+//     console.log(file);
 
 //     outputFilePath = Date.now() + "output.pdf";
 
@@ -206,6 +143,22 @@ app.listen(port, () => console.log("Server connected"));
 //       });
 //     });
 //   }
+// });
+
+// app.post("/", (req, res) => {
+//   fs.access("./files", (error) => {
+//     if (error) {
+//       fs.mkdirSync("./files");
+//     }
+//     upload(req, res, function (err) {
+//       if (err instanceof multer.MulterError) {
+//         return res.status(500).json(err);
+//       } else if (err) {
+//         return res.status(500).json(err);
+//       }
+//       return res.status(200).send(req.file);
+//     });
+//   });
 // });
 
 // app.listen(PORT, () => {
