@@ -4,8 +4,9 @@ const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
 const libre = require("libreoffice-convert");
-require("dotenv").config({ path: ".env" });
+const request = require("request");
 
+require("dotenv").config({ path: ".env" });
 const app = express();
 const port = 8000;
 const pathTo = path.resolve(__dirname, "files");
@@ -56,6 +57,51 @@ app.post("/", (req, res) => {
       res.status(200).send(req.file);
     });
   });
+});
+
+var https = require("https");
+
+// Get your own by registering at https://app.pdf.co/documentation/api
+
+// Source PDF file
+const SourceFile = enterPath;
+// PDF document password. Leave empty for unprotected documents.
+const Password = "";
+// Destination PDF file name
+const DestinationFile = outputPath;
+
+// Prepare URL for `Optimize PDF` API endpoint
+var query = `https://api.pdf.co/v1/pdf/optimize`;
+let reqOptions = {
+  uri: query,
+  headers: { "x-api-key": process.env.API_KEY },
+  formData: {
+    name: path.basename(DestinationFile),
+    password: Password,
+    file: fs.createReadStream(SourceFile),
+  },
+};
+
+// Send request
+request.post(reqOptions, function (error, response, body) {
+  if (error) {
+    return console.error("Error: ", error);
+  }
+
+  // Parse JSON response
+  let data = JSON.parse(body);
+  if (data.error == false) {
+    // Download PDF file
+    var file = fs.createWriteStream(DestinationFile);
+    https.get(data.url, (response2) => {
+      response2.pipe(file).on("close", () => {
+        console.log(`Generated PDF file saved as "${DestinationFile}" file.`);
+      });
+    });
+  } else {
+    // Service reported error
+    console.log("Error: " + data.message);
+  }
 });
 
 app.listen(port, () => console.log("Server connected"));
