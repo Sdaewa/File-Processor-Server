@@ -5,20 +5,20 @@ const multer = require("multer");
 const cors = require("cors");
 const libre = require("libreoffice-convert");
 const request = require("request");
+const https = require("https");
 
 require("dotenv").config({ path: ".env" });
 const app = express();
 const port = 8000;
-const pathTo = path.resolve(__dirname, "files");
+const pathTo = path.resolve(__dirname, "files/pdf");
 const fileArr = fs.readdirSync(pathTo);
 const fileNameExt = fileArr[0];
 const fileName = path.basename(fileNameExt, ".doc" || ".docx");
-const extend = ".pdf";
-const enterPath = path.join(__dirname, `/files/${fileNameExt}`);
-const outputPath = path.join(__dirname, `/files/${fileName}${extend}`);
+const enterPath = path.join(__dirname, `/files/doc/${fileNameExt}`);
+const outputPath = path.join(__dirname, `/files/pdf/${fileName}`);
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "files");
+    cb(null, "files/doc");
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
@@ -29,7 +29,7 @@ const upload = multer({ storage: storage }).single("file");
 
 app.use(cors());
 
-app.get("/convert", (req, res) => {
+app.get("/convertToPdf", (req, res) => {
   // Read file
   const file = fs.readFileSync(enterPath);
   // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
@@ -44,9 +44,9 @@ app.get("/convert", (req, res) => {
 });
 
 app.post("/", (req, res) => {
-  fs.access("./files", (error) => {
+  fs.access("./files/doc", (error) => {
     if (error) {
-      fs.mkdirSync("./files");
+      fs.mkdirSync("./files/doc");
     }
     upload(req, res, function (err) {
       if (err instanceof multer.MulterError) {
@@ -59,16 +59,12 @@ app.post("/", (req, res) => {
   });
 });
 
-var https = require("https");
-
-// Get your own by registering at https://app.pdf.co/documentation/api
-
 // Source PDF file
-const SourceFile = enterPath;
+const SourceFile = path.join(__dirname, `/files/pdf/${fileName}`);
 // PDF document password. Leave empty for unprotected documents.
 const Password = "";
 // Destination PDF file name
-const DestinationFile = outputPath;
+const DestinationFile = path.join(__dirname, `/files/minPdf/${fileName}`);
 
 // Prepare URL for `Optimize PDF` API endpoint
 var query = `https://api.pdf.co/v1/pdf/optimize`;
@@ -82,26 +78,26 @@ let reqOptions = {
   },
 };
 
-// Send request
-request.post(reqOptions, function (error, response, body) {
-  if (error) {
-    return console.error("Error: ", error);
-  }
-
-  // Parse JSON response
-  let data = JSON.parse(body);
-  if (data.error == false) {
-    // Download PDF file
-    var file = fs.createWriteStream(DestinationFile);
-    https.get(data.url, (response2) => {
-      response2.pipe(file).on("close", () => {
-        console.log(`Generated PDF file saved as "${DestinationFile}" file.`);
+app.post("/convertToMin", (req, res) => {
+  // Send request
+  request.post(reqOptions, function (error, response, body) {
+    if (error) {
+      return console.error("Error: ", error);
+    }
+    // Parse JSON response
+    let data = JSON.parse(body);
+    if (data.error == false) {
+      // Download PDF file
+      var file = fs.createWriteStream(DestinationFile);
+      https.get(data.url, (response2) => {
+        response2.pipe(file).on("close", () => {
+          console.log(`Generated PDF file saved as "${DestinationFile}" file.`);
+        });
       });
-    });
-  } else {
-    // Service reported error
-    console.log("Error: " + data.message);
-  }
+    } else {
+      // Service reported error
+      console.log("Error: " + data.message);
+    }
+  });
 });
-
 app.listen(port, () => console.log("Server connected"));
