@@ -78,7 +78,8 @@ let reqOptions = {
   },
 };
 
-const getMin = () => {
+app.get("/convertToMin", (req, ers) => {
+  // Send request
   request.post(reqOptions, function (error, response, body) {
     if (error) {
       return console.error("Error: ", error);
@@ -99,12 +100,6 @@ const getMin = () => {
       console.log("Error: " + data.message);
     }
   });
-};
-
-app.get("/convertToMin", (req, res) => {
-  getMin();
 });
-
-// Send request
 
 app.listen(port, () => console.log("Server connected"));
