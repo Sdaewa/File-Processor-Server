@@ -59,6 +59,11 @@ app.post("/", (req, res) => {
   });
 });
 
+app.post("/sendByEmail", (req, res) => {
+  console.log(req.body);
+  console.log(res.body);
+});
+
 // Source PDF file
 const SourceFile = path.join(__dirname, `/files/pdf/${fileName}`);
 // PDF document password. Leave empty for unprotected documents.
