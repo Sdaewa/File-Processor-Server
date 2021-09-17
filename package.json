@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/Sdaewa/compressor_server#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.6",
     "axios": "^0.21.1",
     "base64topdf": "^1.1.8",
     "cors": "^2.8.5",

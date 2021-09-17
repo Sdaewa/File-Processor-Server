@@ -4,9 +4,13 @@ const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
 const libre = require("libreoffice-convert");
-
 const request = require("request");
+const sgMail = require("@sendgrid/mail");
 const https = require("https");
+
+// const nodemailer = require("nodemailer");
+
+// const sendGridTransport = require("nodemailer-sendgrid-transport");
 
 require("dotenv").config({ path: ".env" });
 const app = express();
@@ -25,6 +29,8 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   },
 });
+sgMail.setApiKey(process.env.SG_KEY);
+
 const upload = multer({ storage: storage }).single("file");
 // const filesPath = path.join(__dirname + "/files");
 app.use(cors());
@@ -62,12 +68,26 @@ app.post("/", (req, res) => {
 });
 
 app.post("/sendByEmail", (req, res) => {
-  // console.log("REQUEST+>>>---", req);
+  const { emailAddress } = req.body;
 
-  console.log(req.body.emailAddress);
+  const msg = {
+    to: emailAddress,
+    from: process.en,
+    subject: "Sending with SendGrid is Fun",
+    text: "and easy to do anywhere, even with Node.js",
+    attachments: [
+      {
+        content: fileNameExt,
+        filename: "attachment.pdf",
+        type: "application/pdf",
+        disposition: "attachment",
+      },
+    ],
+  };
 
-  // console.log("RESPONSE+>>>---", res.body.email);
-  res.status(200).send("Got it");
+  sgMail.send(msg).catch((err) => {
+    console.log(err);
+  });
 });
 
 // Source PDF file
