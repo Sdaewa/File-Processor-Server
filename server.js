@@ -4,6 +4,7 @@ const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
 const libre = require("libreoffice-convert");
+
 const request = require("request");
 const https = require("https");
 
@@ -26,8 +27,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage }).single("file");
 // const filesPath = path.join(__dirname + "/files");
-
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.get("/convertToPdf", (req, res) => {
   // Read file
@@ -60,8 +62,12 @@ app.post("/", (req, res) => {
 });
 
 app.post("/sendByEmail", (req, res) => {
+  // console.log("REQUEST+>>>---", req);
+
   console.log(req.body);
-  console.log(res.body);
+
+  // console.log("RESPONSE+>>>---", res.body.email);
+  res.status(200).send("Got it");
 });
 
 // Source PDF file
