@@ -5,7 +5,7 @@ const multer = require("multer");
 const cors = require("cors");
 const libre = require("libreoffice-convert");
 const request = require("request");
-const sgMail = require("@sendgrid/mail");
+const sg = require("@sendgrid/mail");
 const https = require("https");
 
 // const nodemailer = require("nodemailer");
@@ -21,6 +21,8 @@ const fileNameExt = fileArr[0];
 const fileName = path.basename(fileNameExt, ".doc" || ".docx");
 const enterPath = path.join(__dirname, `/files/doc/${fileNameExt}`);
 const outputPath = path.join(__dirname, `/files/pdf/${fileName}`);
+console.log(fileNameExt);
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
@@ -29,7 +31,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   },
 });
-sgMail.setApiKey(process.env.SG_KEY);
+sg.setApiKey(process.env.SG_KEY);
 
 const upload = multer({ storage: storage }).single("file");
 // const filesPath = path.join(__dirname + "/files");
@@ -66,28 +68,35 @@ app.post("/", (req, res) => {
     });
   });
 });
+// attachment = fs.readFileSync(fileNameExt).toString("base64");
+
+// console.log(attachment);
 
 app.post("/sendByEmail", (req, res) => {
   const { emailAddress } = req.body;
-
   const msg = {
     to: emailAddress,
-    from: process.en,
+    from: process.env.EMAIL,
     subject: "Sending with SendGrid is Fun",
     text: "and easy to do anywhere, even with Node.js",
-    attachments: [
-      {
-        content: fileNameExt,
-        filename: "attachment.pdf",
-        type: "application/pdf",
-        disposition: "attachment",
-      },
-    ],
+    html: "<strong>and easy to do anywhere, even with Node.js</strong>",
   };
 
-  sgMail.send(msg).catch((err) => {
-    console.log(err);
-  });
+  sg.send(msg)
+    .then(() => {
+      /* assume success */
+      console.log("succes");
+    })
+    .catch((error) => {
+      /* log friendly error */
+      console.error(error.toString());
+
+      /* extract error message */
+      const { message, code, response } = error;
+
+      /* extract response message */
+      const { headers, body } = response;
+    });
 });
 
 // Source PDF file
