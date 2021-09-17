@@ -64,7 +64,7 @@ app.post("/", (req, res) => {
 app.post("/sendByEmail", (req, res) => {
   // console.log("REQUEST+>>>---", req);
 
-  console.log(req.body);
+  console.log(req.body.emailAddress);
 
   // console.log("RESPONSE+>>>---", res.body.email);
   res.status(200).send("Got it");
