@@ -8,9 +8,9 @@ const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
 
-// const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 
-// const sendGridTransport = require("nodemailer-sendgrid-transport");
+const sendGridTransport = require("nodemailer-sendgrid-transport");
 
 require("dotenv").config({ path: ".env" });
 const app = express();
@@ -22,7 +22,6 @@ const fileName = path.basename(fileNameExt, ".doc" || ".docx");
 const enterPath = path.join(__dirname, `/files/doc/${fileNameExt}`);
 const outputPath = path.join(__dirname, `/files/pdf/${fileName}`);
 console.log(fileNameExt);
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
@@ -68,35 +67,55 @@ app.post("/", (req, res) => {
     });
   });
 });
-// attachment = fs.readFileSync(fileNameExt).toString("base64");
 
-// console.log(attachment);
+pathToAttachment = `${__dirname}/files/pdf/${fileNameExt}`;
+
+console.log(pathToAttachment);
+attachment = fs.readFileSync(pathToAttachment);
+
+console.log(attachment);
 
 app.post("/sendByEmail", (req, res) => {
   const { emailAddress } = req.body;
-  const msg = {
-    to: emailAddress,
-    from: process.env.EMAIL,
-    subject: "Sending with SendGrid is Fun",
-    text: "and easy to do anywhere, even with Node.js",
-    html: "<strong>and easy to do anywhere, even with Node.js</strong>",
-  };
+  fs.readFileSync(pathToAttachment, (err, data) => {
+    if (err) {
+      console.log(err);
+    }
+    if (data) {
+      const msg = {
+        to: emailAddress,
+        from: process.env.EMAIL,
+        subject: "Sending with SendGrid is Fun",
+        text: "and easy to do anywhere, even with Node.js",
+        html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+        attachments: [
+          {
+            content: attachment,
+            filename: "sample.pdf",
+            type: "application/pdf",
+            disposition: "attachment",
+            content_id: "mytext",
+          },
+        ],
+      };
 
-  sg.send(msg)
-    .then(() => {
-      /* assume success */
-      console.log("succes");
-    })
-    .catch((error) => {
-      /* log friendly error */
-      console.error(error.toString());
+      sg.send(msg)
+        .then(() => {
+          /* assume success */
+          console.log("succes");
+        })
+        .catch((error) => {
+          /* log friendly error */
+          console.error(error.toString());
 
-      /* extract error message */
-      const { message, code, response } = error;
+          /* extract error message */
+          const { message, code, response } = error;
 
-      /* extract response message */
-      const { headers, body } = response;
-    });
+          /* extract response message */
+          const { headers, body } = response;
+        });
+    }
+  });
 });
 
 // Source PDF file
