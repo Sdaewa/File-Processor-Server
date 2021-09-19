@@ -8,9 +8,9 @@ const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
 
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 
-const sendGridTransport = require("nodemailer-sendgrid-transport");
+// const sendGridTransport = require("nodemailer-sendgrid-transport");
 
 require("dotenv").config({ path: ".env" });
 const app = express();
@@ -77,45 +77,44 @@ console.log(attachment);
 
 app.post("/sendByEmail", (req, res) => {
   const { emailAddress } = req.body;
-  fs.readFileSync(pathToAttachment, (err, data) => {
-    if (err) {
-      console.log(err);
-    }
-    if (data) {
-      const msg = {
-        to: emailAddress,
-        from: process.env.EMAIL,
-        subject: "Sending with SendGrid is Fun",
-        text: "and easy to do anywhere, even with Node.js",
-        html: "<strong>and easy to do anywhere, even with Node.js</strong>",
-        attachments: [
-          {
-            content: attachment,
-            filename: "sample.pdf",
-            type: "application/pdf",
-            disposition: "attachment",
-            content_id: "mytext",
-          },
-        ],
-      };
+  // fs.readFileSync(pathToAttachment, (err, data) => {
+  //   if (err) {
+  //     console.log(err);
+  //   }
 
-      sg.send(msg)
-        .then(() => {
-          /* assume success */
-          console.log("succes");
-        })
-        .catch((error) => {
-          /* log friendly error */
-          console.error(error.toString());
+  const msg = {
+    to: emailAddress,
+    from: process.env.EMAIL,
+    subject: "Sending with SendGrid is Fun",
+    text: "and easy to do anywhere, even with Node.js",
+    html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+    attachments: [
+      {
+        content: attachment.toString("base64"),
+        filename: "sample.pdf",
+        type: "application/pdf",
+        disposition: "attachment",
+        content_id: "mytext",
+      },
+    ],
+  };
+  console.log("message=>", msg);
+  sg.send(msg)
+    .then(() => {
+      /* assume success */
+      console.log("succes");
+    })
+    .catch((error) => {
+      /* log friendly error */
+      console.error(error.toString());
 
-          /* extract error message */
-          const { message, code, response } = error;
+      /* extract error message */
+      const { message, code, response } = error;
 
-          /* extract response message */
-          const { headers, body } = response;
-        });
-    }
-  });
+      /* extract response message */
+      const { headers, body } = response;
+    });
+  // });
 });
 
 // Source PDF file
