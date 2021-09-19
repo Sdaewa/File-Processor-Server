@@ -8,20 +8,17 @@ const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
 
-// const nodemailer = require("nodemailer");
-
-// const sendGridTransport = require("nodemailer-sendgrid-transport");
-
 require("dotenv").config({ path: ".env" });
 const app = express();
 const port = 8000;
 const pathTo = path.resolve(__dirname, "files/pdf");
 const fileArr = fs.readdirSync(pathTo);
 const fileNameExt = fileArr[0];
+const fileNameOnly = fileNameExt.split(".")[0];
 const fileName = path.basename(fileNameExt, ".doc" || ".docx");
-const enterPath = path.join(__dirname, `/files/doc/${fileNameExt}`);
+const enterPath = path.join(__dirname, `/files/doc/${fileNameOnly}`);
 const outputPath = path.join(__dirname, `/files/pdf/${fileName}`);
-console.log(fileNameExt);
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
@@ -39,6 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get("/convertToPdf", (req, res) => {
+  const extend = ".pdf";
   // Read file
   const file = fs.readFileSync(enterPath);
   // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
@@ -69,18 +67,10 @@ app.post("/", (req, res) => {
 });
 
 pathToAttachment = `${__dirname}/files/pdf/${fileNameExt}`;
-
-console.log(pathToAttachment);
 attachment = fs.readFileSync(pathToAttachment);
-
-console.log(attachment);
 
 app.post("/sendByEmail", (req, res) => {
   const { emailAddress } = req.body;
-  // fs.readFileSync(pathToAttachment, (err, data) => {
-  //   if (err) {
-  //     console.log(err);
-  //   }
 
   const msg = {
     to: emailAddress,
@@ -98,7 +88,6 @@ app.post("/sendByEmail", (req, res) => {
       },
     ],
   };
-  console.log("message=>", msg);
   sg.send(msg)
     .then(() => {
       /* assume success */
