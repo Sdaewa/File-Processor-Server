@@ -15,10 +15,9 @@ const pathTo = path.resolve(__dirname, "files/pdf");
 const fileArr = fs.readdirSync(pathTo);
 const fileNameExt = fileArr[0];
 const fileNameOnly = fileNameExt.split(".")[0];
-const fileName = path.basename(fileNameExt, ".doc" || ".docx");
-const enterPath = path.join(__dirname, `/files/doc/${fileNameOnly}`);
+const fileName = path.basename(fileNameExt);
+const enterPath = path.join(__dirname, `/files/doc/${fileNameOnly}.doc`);
 const outputPath = path.join(__dirname, `/files/pdf/${fileName}`);
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
@@ -39,6 +38,7 @@ app.get("/convertToPdf", (req, res) => {
   const extend = ".pdf";
   // Read file
   const file = fs.readFileSync(enterPath);
+
   // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
   libre.convert(file, extend, undefined, (err, done) => {
     if (err) {
