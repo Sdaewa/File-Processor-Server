@@ -41,8 +41,9 @@ app.get("/convertToPdf", (req, res) => {
 
   // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
   libre.convert(file, extend, undefined, (err, done) => {
-    if (err) {
-      console.log(`Error converting file: ${err}`);
+    if (error) {
+      console.log(`Error converting file: ${error}`);
+      throw new Error({ error: error });
     }
     // Here in done you have pdf file which you can save or transfer in another stream
     fs.writeFileSync(outputPath, done);
@@ -96,6 +97,7 @@ app.post("/sendByEmail", (req, res) => {
     .catch((error) => {
       /* log friendly error */
       console.error(error.toString());
+      throw new Error({ error: error });
 
       /* extract error message */
       const { message, code, response } = error;
@@ -114,7 +116,7 @@ const Password = "";
 const DestinationFile = path.join(__dirname, `/files/minPdf/${fileName}`);
 
 // Prepare URL for `Optimize PDF` API endpoint
-var query = `https://api.pdf.co/v1/pdf/optimize`;
+var query = process.env.PDF_CO_URL;
 let reqOptions = {
   uri: query,
   headers: { "x-api-key": process.env.API_KEY },
@@ -125,13 +127,9 @@ let reqOptions = {
   },
 };
 
-app.get("/convertToMin", (req, ers) => {
+app.get("/convertToMin", (req, res) => {
   // Send request
-  request.post(reqOptions, function (error, response, body) {
-    if (error) {
-      return console.error("Error: ", error);
-    }
-
+  request.post(reqOptions, function (error, res, body) {
     // Parse JSON response
     let data = JSON.parse(body);
     if (data.error == false) {
@@ -145,6 +143,7 @@ app.get("/convertToMin", (req, ers) => {
     } else {
       // Service reported error
       console.log("Error: " + data.message);
+      throw new Error({ error: data.message });
     }
   });
 });
