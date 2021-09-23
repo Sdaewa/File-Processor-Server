@@ -90,8 +90,7 @@ app.post("/sendByEmail", (req, res) => {
     ],
   };
   sg.send(msg)
-    .then(() => {
-      /* assume success */
+    .then((res) => {
       console.log("succes");
     })
     .catch((error) => {
