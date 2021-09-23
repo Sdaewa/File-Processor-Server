@@ -32,7 +32,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get("/convertToPdf", (req, res) => {
+app.get("/downloadPdf", (req, res) => {
   const extend = ".pdf";
   const fileName = fileArr[0].split(".")[0];
   const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
@@ -56,7 +56,11 @@ app.get("/convertToPdf", (req, res) => {
   });
 });
 
-app.post("/", (req, res) => {
+app.post("/upload", (req, res) => {
+  const extend = ".pdf";
+  const fileName = fileArr[0].split(".")[0];
+  const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
   fs.access("./files/doc", (error) => {
     if (error) {
       fs.mkdirSync("./files/doc");
@@ -69,6 +73,23 @@ app.post("/", (req, res) => {
       }
       res.status(200).send(req.file);
     });
+  });
+
+  // Read file
+  const file = fs.readFileSync(pathToDoc);
+  if (!file) {
+    return console.log("no file found");
+  }
+
+  // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+  libre.convert(file, extend, undefined, (err, done) => {
+    if (err) {
+      console.log(`Error converting file: ${err}`);
+      throw new Error({ error: error });
+    }
+    // Here in done you have pdf file which you can save or transfer in another stream
+    fs.writeFileSync(pathToPdf, done);
+    res.send(done);
   });
 });
 
