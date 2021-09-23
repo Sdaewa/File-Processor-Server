@@ -9,41 +9,35 @@ const sg = require("@sendgrid/mail");
 const https = require("https");
 
 require("dotenv").config({ path: ".env" });
+sg.setApiKey(process.env.SG_KEY);
+
 const app = express();
 const port = 8000;
 
-// const pathToPdf = path.resolve(__dirname, "files/pdf");
 const pathTo = path.resolve(__dirname, "files/doc");
-// const pathToMin = path.resolve(__dirname, "files/minPdf");
 const fileArr = fs.readdirSync(pathTo);
-// const fileArrPdf = fs.readdirSync(pathToPdf);
-// const fileArrMin = fs.readdirSync(pathToMin);
-const fileNameExt = fileArr[0];
-// const fileNamePdf = fileArrPdf[0];
-// const fileNameMin = fileArrMin[0];
-const fileNameOnly = fileNameExt.split(".")[0];
-console.log(fileNameExt);
-const pathToDoc = path.join(__dirname, `/files/doc/${fileNameOnly}.doc`);
-const pathToPdf = path.join(__dirname, `/files/pdf/${fileNameOnly}.pdf`);
-const pathToMin = path.join(__dirname, `/files/minPdf/${fileNameOnly}.pdf`);
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
   },
-  filename: function (req, file, cb) {
+  fileName: function (req, file, cb) {
     cb(null, file.originalname);
   },
 });
-sg.setApiKey(process.env.SG_KEY);
 
 const upload = multer({ storage: storage }).single("file");
-// const filesPath = path.join(__dirname + "/files");
+
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get("/convertToPdf", (req, res) => {
   const extend = ".pdf";
+  const fileName = fileArr[0].split(".")[0];
+  const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
+
   // Read file
   const file = fs.readFileSync(pathToDoc);
   if (!file) {
@@ -79,6 +73,8 @@ app.post("/", (req, res) => {
 });
 
 app.post("/sendByEmail", (req, res) => {
+  const fileName = fileNameExt.split(".")[0];
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
   attachment = fs.readFileSync(pathToPdf);
   const { emailAddress } = req.body;
 
@@ -91,7 +87,7 @@ app.post("/sendByEmail", (req, res) => {
     attachments: [
       {
         content: attachment.toString("base64"),
-        filename: "sample.pdf",
+        fileName: "sample.pdf",
         type: "application/pdf",
         disposition: "attachment",
         content_id: "mytext",
@@ -116,25 +112,22 @@ app.post("/sendByEmail", (req, res) => {
   // });
 });
 
-// Source PDF file
-const SourceFile = pathToPdf;
-// PDF document password. Leave empty for unprotected documents.
-const Password = "";
-// Destination PDF file name
-
-// Prepare URL for `Optimize PDF` API endpoint
 var query = process.env.PDF_CO_URL;
-let reqOptions = {
-  uri: query,
-  headers: { "x-api-key": process.env.API_KEY },
-  formData: {
-    name: path.basename(pathToMin),
-    password: Password,
-    file: fs.createReadStream(SourceFile),
-  },
-};
 
 app.get("/convertToMin", (req, res) => {
+  const fileName = fileNameExt.split(".")[0];
+  const pathToMin = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
+
+  let reqOptions = {
+    uri: query,
+    headers: { "x-api-key": process.env.API_KEY },
+    formData: {
+      name: path.basename(pathToMin),
+      password: Password,
+      file: fs.createReadStream(pathToPdf),
+    },
+  };
+
   // Send request
   request.post(reqOptions, function (error, res, body) {
     // Parse JSON response
