@@ -81,13 +81,13 @@ app.post("/sendByEmail", (req, res) => {
   const msg = {
     to: emailAddress,
     from: process.env.EMAIL,
-    subject: "Sending with SendGrid is Fun",
+    subject: "This is your PDF file 📄",
     text: "and easy to do anywhere, even with Node.js",
     html: "<strong>and easy to do anywhere, even with Node.js</strong>",
     attachments: [
       {
         content: attachment.toString("base64"),
-        fileName: "sample.pdf",
+        fileName: `${fileName}.pdf`,
         type: "application/pdf",
         disposition: "attachment",
         content_id: "mytext",
