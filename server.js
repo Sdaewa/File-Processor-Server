@@ -11,13 +11,21 @@ const https = require("https");
 require("dotenv").config({ path: ".env" });
 const app = express();
 const port = 8000;
-const pathTo = path.resolve(__dirname, "files/pdf");
+
+// const pathToPdf = path.resolve(__dirname, "files/pdf");
+const pathTo = path.resolve(__dirname, "files/doc");
+// const pathToMin = path.resolve(__dirname, "files/minPdf");
 const fileArr = fs.readdirSync(pathTo);
+// const fileArrPdf = fs.readdirSync(pathToPdf);
+// const fileArrMin = fs.readdirSync(pathToMin);
 const fileNameExt = fileArr[0];
+// const fileNamePdf = fileArrPdf[0];
+// const fileNameMin = fileArrMin[0];
 const fileNameOnly = fileNameExt.split(".")[0];
-const fileName = path.basename(fileNameExt);
-const enterPath = path.join(__dirname, `/files/doc/${fileNameOnly}.doc`);
-const outputPath = path.join(__dirname, `/files/pdf/${fileName}`);
+console.log(fileNameExt);
+const pathToDoc = path.join(__dirname, `/files/doc/${fileNameOnly}.doc`);
+const pathToPdf = path.join(__dirname, `/files/pdf/${fileNameOnly}.pdf`);
+const pathToMin = path.join(__dirname, `/files/minPdf/${fileNameOnly}.pdf`);
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
@@ -37,16 +45,19 @@ app.use(express.json());
 app.get("/convertToPdf", (req, res) => {
   const extend = ".pdf";
   // Read file
-  const file = fs.readFileSync(enterPath);
+  const file = fs.readFileSync(pathToDoc);
+  if (!file) {
+    return console.log("no file found");
+  }
 
   // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
   libre.convert(file, extend, undefined, (err, done) => {
-    if (error) {
-      console.log(`Error converting file: ${error}`);
+    if (err) {
+      console.log(`Error converting file: ${err}`);
       throw new Error({ error: error });
     }
     // Here in done you have pdf file which you can save or transfer in another stream
-    fs.writeFileSync(outputPath, done);
+    fs.writeFileSync(pathToPdf, done);
     res.send(done);
   });
 });
@@ -67,10 +78,8 @@ app.post("/", (req, res) => {
   });
 });
 
-pathToAttachment = `${__dirname}/files/pdf/${fileNameExt}`;
-attachment = fs.readFileSync(pathToAttachment);
-
 app.post("/sendByEmail", (req, res) => {
+  attachment = fs.readFileSync(pathToPdf);
   const { emailAddress } = req.body;
 
   const msg = {
@@ -96,7 +105,7 @@ app.post("/sendByEmail", (req, res) => {
     .catch((error) => {
       /* log friendly error */
       console.error(error.toString());
-      throw new Error({ error: error });
+      // throw new Error({ error: error });
 
       /* extract error message */
       const { message, code, response } = error;
@@ -108,11 +117,10 @@ app.post("/sendByEmail", (req, res) => {
 });
 
 // Source PDF file
-const SourceFile = path.join(__dirname, `/files/pdf/${fileName}`);
+const SourceFile = pathToPdf;
 // PDF document password. Leave empty for unprotected documents.
 const Password = "";
 // Destination PDF file name
-const DestinationFile = path.join(__dirname, `/files/minPdf/${fileName}`);
 
 // Prepare URL for `Optimize PDF` API endpoint
 var query = process.env.PDF_CO_URL;
@@ -120,7 +128,7 @@ let reqOptions = {
   uri: query,
   headers: { "x-api-key": process.env.API_KEY },
   formData: {
-    name: path.basename(DestinationFile),
+    name: path.basename(pathToMin),
     password: Password,
     file: fs.createReadStream(SourceFile),
   },
@@ -133,16 +141,16 @@ app.get("/convertToMin", (req, res) => {
     let data = JSON.parse(body);
     if (data.error == false) {
       // Download PDF file
-      var file = fs.createWriteStream(DestinationFile);
+      var file = fs.createWriteStream(pathToMin);
       https.get(data.url, (response2) => {
         response2.pipe(file).on("close", () => {
-          console.log(`Generated PDF file saved as "${DestinationFile}" file.`);
+          console.log(`Generated PDF file saved as "${pathToMin}" file.`);
         });
       });
     } else {
       // Service reported error
       console.log("Error: " + data.message);
-      throw new Error({ error: data.message });
+      // throw new Error({ error: data.message });
     }
   });
 });
