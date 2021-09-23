@@ -99,8 +99,8 @@ app.post("/sendByEmail", (req, res) => {
     ],
   };
   sg.send(msg)
-    .then((res) => {
-      console.log("succes");
+    .then((response) => {
+      res.sendStatus(response[0].statusCode);
     })
     .catch((error) => {
       /* log friendly error */
@@ -108,10 +108,10 @@ app.post("/sendByEmail", (req, res) => {
       // throw new Error({ error: error });
 
       /* extract error message */
-      const { message, code, response } = error;
+      // const { message, code, response } = error;
 
       /* extract response message */
-      const { headers, body } = response;
+      // const { headers, body } = response;
     });
   // });
 });
