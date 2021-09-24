@@ -16,75 +16,38 @@ const port = 8000;
 
 const pathTo = path.resolve(__dirname, "files/doc");
 const fileArr = fs.readdirSync(pathTo);
-// const fileName = fileArr[0].split(".")[0];
-// const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
-// const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
+const fileName = fileArr[0].split(".")[0];
+const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
+const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
   },
   filename: function (req, file, cb) {
-    /*Appending extension with original name*/
-    cb(null, Date.now() + file.originalname);
+    cb(null, file.originalname);
   },
 });
 
-const upload = multer({ storage: storage }).single("file");
+const upload = multer({ storage: storage });
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get("/downloadPdf", (req, res) => {
-  const extend = ".pdf";
   const fileName = fileArr[0].split(".")[0];
   const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
-  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
 
-  // Read file
   const file = fs.readFileSync(pathToDoc);
   if (!file) {
     return console.log("no file found");
   }
-
-  // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-  libre.convert(file, extend, undefined, (err, done) => {
-    if (err) {
-      console.log(`Error converting file: ${err}`);
-      throw new Error({ error: error });
-    }
-    // Here in done you have pdf file which you can save or transfer in another stream
-    fs.writeFileSync(pathToPdf, done);
-    res.send(done);
-  });
+  res.send(file);
 });
 
-// const convertDoc = () => {
-//   const fileName = fileArr[0].split(".")[0];
-//   const extend = ".pdf";
-//   const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
-//   const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
-
-//   // Read file
-//   const file = fs.readFileSync(pathToDoc);
-//   if (!file) {
-//     return console.log("no file found");
-//   }
-
-//   // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-//   libre.convert(file, extend, undefined, (err, done) => {
-//     if (err) {
-//       console.log(`Error converting file: ${err}`);
-//       throw new Error({ error: error });
-//     }
-//     // Here in done you have pdf file which you can save or transfer in another stream
-//     fs.writeFileSync(pathToPdf, done);
-//     return res.send(done);
-//   });
-// };
-
-app.post("/upload", (req, res) => {
+app.post("/upload", upload.single("file"), (req, res) => {
+  console.log(res.statusCode);
   // fs.access("./files/doc", (error) => {
   //   if (error) {
   //     fs.mkdirSync("./files/doc");
@@ -98,57 +61,36 @@ app.post("/upload", (req, res) => {
   //     res.status(200).send(req.file);
   //   });
   // });
+  if (res.statusCode === 200) {
+    const extend = ".pdf";
+    const fileName = fileArr[0].split(".")[0];
+    const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
+    const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
 
-  fs.promises
-    .access("./files/doc")
-    .then(
-      upload(req, res, function (err) {
-        if (err instanceof multer.MulterError) {
-          return res.status(500).json(err);
-        } else if (err) {
-          return res.status(500).json(err);
-        }
-        return res.status(200).send(req.file);
-      })
-    )
-    .then(
-      (convertDoc = () => {
-        const fileName = fileArr[0].split(".")[0];
-        const extend = ".pdf";
-        const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
-        const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
+    // Read file
+    const file = fs.readFileSync(pathToDoc);
+    if (!file) {
+      return console.log("no file found");
+    }
 
-        // Read file
-        const file = fs.readFileSync(pathToDoc);
-        if (!file) {
-          return console.log("no file found");
-        }
-
-        // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-        libre.convert(file, extend, undefined, (err, done) => {
-          if (err) {
-            console.log(`Error converting file: ${err}`);
-            throw new Error({ error: error });
-          }
-          // Here in done you have pdf file which you can save or transfer in another stream
-          fs.writeFileSync(pathToPdf, done);
-          return res.send(done);
-        });
-      })
-    )
-    .catch((e) => {
-      if (e.code === "ENOENT") {
-        console.log("Creating folder...");
-        return fs.mkdirSync(triagePath);
+    // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+    libre.convert(file, extend, undefined, (err, done) => {
+      if (err) {
+        console.log(`Error converting file: ${err}`);
+        throw new Error({ error: error });
       }
-      throw e;
+      // Here in done you have pdf file which you can save or transfer in another stream
+      fs.writeFileSync(pathToPdf, done);
+      res.send(done);
     });
+  }
 });
 
 app.post("/sendByEmail", (req, res) => {
-  const fileName = fileNameExt.split(".")[0];
+  const fileName = fileArr[0].split(".")[0];
   const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
   attachment = fs.readFileSync(pathToPdf);
+  console.log(attachment);
   const { emailAddress } = req.body;
 
   const msg = {
@@ -160,7 +102,7 @@ app.post("/sendByEmail", (req, res) => {
     attachments: [
       {
         content: attachment.toString("base64"),
-        fileName: `${fileName}.pdf`,
+        filename: `${fileName}.pdf`,
         type: "application/pdf",
         disposition: "attachment",
         content_id: "mytext",
@@ -188,7 +130,7 @@ app.post("/sendByEmail", (req, res) => {
 var query = process.env.PDF_CO_URL;
 
 app.get("/convertToMin", (req, res) => {
-  const fileName = fileNameExt.split(".")[0];
+  const fileName = fileArr[0].split(".")[0];
   const pathToMin = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
 
   let reqOptions = {
