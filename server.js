@@ -16,9 +16,6 @@ const port = 8000;
 
 const pathTo = path.resolve(__dirname, "files/doc");
 const fileArr = fs.readdirSync(pathTo);
-const fileName = fileArr[0].split(".")[0];
-const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
-const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -47,7 +44,6 @@ app.get("/downloadPdf", (req, res) => {
 });
 
 app.post("/upload", upload.single("file"), (req, res) => {
-  console.log(res.statusCode);
   // fs.access("./files/doc", (error) => {
   //   if (error) {
   //     fs.mkdirSync("./files/doc");
@@ -131,6 +127,7 @@ var query = process.env.PDF_CO_URL;
 
 app.get("/convertToMin", (req, res) => {
   const fileName = fileArr[0].split(".")[0];
+  const pathToPdf = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
   const pathToMin = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
 
   let reqOptions = {
@@ -138,7 +135,6 @@ app.get("/convertToMin", (req, res) => {
     headers: { "x-api-key": process.env.API_KEY },
     formData: {
       name: path.basename(pathToMin),
-      password: Password,
       file: fs.createReadStream(pathToPdf),
     },
   };
@@ -149,7 +145,7 @@ app.get("/convertToMin", (req, res) => {
     let data = JSON.parse(body);
     if (data.error == false) {
       // Download PDF file
-      var file = fs.createWriteStream(pathToMin);
+      var file = fs.createWriteStream(pathToPdf);
       https.get(data.url, (response2) => {
         response2.pipe(file).on("close", () => {
           console.log(`Generated PDF file saved as "${pathToMin}" file.`);
