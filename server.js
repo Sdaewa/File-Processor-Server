@@ -3,12 +3,11 @@ const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
-// const libre = require("libreoffice-convert");
-const docxConverter = require("docx-pdf");
+const libre = require("libreoffice-convert");
+var docxConverter = require("docx-pdf");
 const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
-const mv = require("mv");
 
 require("dotenv").config({ path: ".env" });
 sg.setApiKey(process.env.SG_KEY);
@@ -18,6 +17,7 @@ const port = 8000;
 
 const pathTo = path.resolve(__dirname, "files/doc");
 const fileArr = fs.readdirSync(pathTo);
+console.log(fileArr);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -45,31 +45,67 @@ app.get("/downloadPdf", (req, res) => {
   res.send(file);
 });
 
+app.post("/upload", upload.single("file"), (req, res) => {
+  console.log(req.file);
+  // fs.access("./files/doc", (error) => {
+  //   if (error) {
+  //     fs.mkdirSync("./files/doc");
+  //   }
+  //   upload(req, res, function (err) {
+  //     if (err instanceof multer.MulterError) {
+  //       return res.status(500).json(err);
+  //     } else if (err) {
+  //       return res.status(500).json(err);
+  //     }
+  //     res.status(200).send(req.file);
+  //   });
+  // });
+  const file = fs.readFileSync(req.file.path);
+  if (file) {
+    fs.readdir(path.join(__dirname, `/files/pdf/`), function (err, data) {
+      if (data.length == 0) {
+        return console.log("Directory is empty!");
+      }
+      const extend = ".pdf";
+      const fileName = req.file.originalname.split(".")[0];
+      const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
+
+      // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+      libre.convert(file, extend, undefined, (err, done) => {
+        if (err) {
+          console.log(`Error converting file: ${err}`);
+          throw new Error({ error: error });
+        }
+        // Here in done you have pdf file which you can save or transfer in another stream
+        fs.writeFileSync(pathToPdf, done);
+        res.send(done);
+      });
+    });
+  }
+});
+
 app.post("/upload", function (req, res) {
-  console.log(req);
-  if (req.file) {
-    const file = req.file,
-      name = file.name,
-      type = file.mimetype;
+  if (req.files.upfile) {
+    (name = file.name), (type = file.mimetype);
     //File where .docx will be downloaded
-    const uploadpath = __dirname + "/files/doc" + name;
+    var uploadpath = __dirname + "/uploads/" + name;
     //Name of the file --ex test,example
     const First_name = name.split(".")[0];
     //Name to download the file
     down_name = First_name;
     //.mv function will be used to move the uploaded file to the
     //upload folder temporarily
-    fs.move(uploadpath, function (err) {
+    file.mv(uploadpath, function (err) {
       if (err) {
         console.log(err);
       } else {
         //Path of the downloaded or uploaded file
-        const initialPath = path.join(
+        var initialPath = path.join(
           __dirname,
           `./uploads/${First_name}${extend_docx}`
         );
         //Path where the converted pdf will be placed/uploaded
-        const upload_path = path.join(
+        var upload_path = path.join(
           __dirname,
           `./uploads/${First_name}${extend_pdf}`
         );
@@ -90,116 +126,6 @@ app.post("/upload", function (req, res) {
     res.end();
   }
 });
-
-// app.post("/upload", upload.single("file"), function (req, res) {
-//   console.log(req);
-//   if (req.file) {
-//     const file = req.file,
-//       name = file.originalname,
-//       type = file.mimetype;
-
-//     //File where .docx will be downloaded
-//     const uploadpath = __dirname + "/file/doc" + name;
-//     //Name of the file --ex test,example
-//     const First_name = name.split(".")[0];
-//     //Name to download the file
-//     down_name = First_name;
-
-//     //Path of the downloaded or uploaded file
-//     const initialPath = path.join(
-//       __dirname,
-//       `./uploads/${First_name}${extend_docx}`
-//     );
-//     //Path where the converted pdf will be placed/uploaded
-//     const upload_path = path.join(
-//       __dirname,
-//       `./uploads/${First_name}${extend_pdf}`
-//     );
-
-//     docxConverter(initialPath, uploadpath, function (err, result) {
-//       if (err) {
-//         console.log(err);
-//       }
-//       console.log("result" + result);
-//       res.sendFile(__dirname + "/down_html.html");
-//     });
-
-// file.mv(uploadpath, function (err) {
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     //Path of the downloaded or uploaded file
-//     const initialPath = path.join(
-//       __dirname,
-//       `./uploads/${First_name}${extend_docx}`
-//     );
-//     //Path where the converted pdf will be placed/uploaded
-//     const upload_path = path.join(
-//       __dirname,
-//       `./uploads/${First_name}${extend_pdf}`
-//     );
-//     //Converter to convert docx to pdf -->docx-pdf is used
-//     //If you want you can use any other converter
-//     //For example -- libreoffice-convert or --awesome-unoconv
-//     docxConverter(initialPath, upload_path, function (err, result) {
-//       if (err) {
-//         console.log(err);
-//       }
-//       console.log("result" + result);
-//       res.sendFile(__dirname + "/down_html.html");
-//     });
-//   }
-// });
-// } else {
-// }
-// res.send("No File selected !");
-// res.end();
-// });
-
-// app.post("/upload", upload.single("file"), (req, res) => {
-//   // fs.access("./files/doc", (error) => {
-//   //   if (error) {
-//   //     fs.mkdirSync("./files/doc");
-//   //   }
-//   //   upload(req, res, function (err) {
-//   //     if (err instanceof multer.MulterError) {
-//   //       return res.status(500).json(err);
-//   //     } else if (err) {
-//   //       return res.status(500).json(err);
-//   //     }
-//   //     res.status(200).send(req.file);
-//   //   });
-//   // });
-
-//   // if (res.statusCode === 200) {
-//   //   fs.readdir(path.join(__dirname, `/files/pdf/`), function (err, data) {
-//   //     if (data.length == 0) {
-//   //       return console.log("Directory is empty!");
-//   //     }
-//   //     const extend = ".pdf";
-//   //     const fileName = fileArr[0].split(".")[0];
-//   //     const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
-//   //     const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
-
-//   //     // Read file
-//   //     const file = fs.readFileSync(pathToDoc);
-//   //     if (!file) {
-//   //       return console.log("no file found");
-//   //     }
-
-//   //     // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-//   //     libre.convert(file, extend, undefined, (err, done) => {
-//   //       if (err) {
-//   //         console.log(`Error converting file: ${err}`);
-//   //         throw new Error({ error: error });
-//   //       }
-//   //       // Here in done you have pdf file which you can save or transfer in another stream
-//   //       fs.writeFileSync(pathToPdf, done);
-//   //       res.send(done);
-//   //     });
-//   //   });
-//   // }
-// });
 
 app.post("/sendByEmail", (req, res) => {
   const fileName = fileArr[0].split(".")[0];
@@ -242,7 +168,7 @@ app.post("/sendByEmail", (req, res) => {
   // });
 });
 
-const query = process.env.PDF_CO_URL;
+var query = process.env.PDF_CO_URL;
 
 app.get("/convertToMin", (req, res) => {
   const fileName = fileArr[0].split(".")[0];
@@ -264,7 +190,7 @@ app.get("/convertToMin", (req, res) => {
     let data = JSON.parse(body);
     if (data.error == false) {
       // Download PDF file
-      const file = fs.createWriteStream(pathToPdf);
+      var file = fs.createWriteStream(pathToPdf);
       https.get(data.url, (response2) => {
         response2.pipe(file).on("close", () => {
           console.log(`Generated PDF file saved as "${pathToMin}" file.`);
