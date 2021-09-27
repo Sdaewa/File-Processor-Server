@@ -4,7 +4,7 @@ const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
 // const libre = require("libreoffice-convert");
-var docxConverter = require("docx-pdf");
+const docxConverter = require("docx-pdf");
 const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
@@ -45,62 +45,116 @@ app.get("/downloadPdf", (req, res) => {
   res.send(file);
 });
 
-app.post("/upload", upload.single("file"), function (req, res) {
+app.post("/upload", function (req, res) {
   console.log(req);
   if (req.file) {
     const file = req.file,
-      name = file.originalname,
+      name = file.name,
       type = file.mimetype;
-
     //File where .docx will be downloaded
     const uploadpath = __dirname + "/files/doc" + name;
     //Name of the file --ex test,example
     const First_name = name.split(".")[0];
     //Name to download the file
     down_name = First_name;
-
     //.mv function will be used to move the uploaded file to the
     //upload folder temporarily
-
-    docxConverter(initialPath, uploadpath, function (err, result) {
+    fs.move(uploadpath, function (err) {
       if (err) {
         console.log(err);
+      } else {
+        //Path of the downloaded or uploaded file
+        const initialPath = path.join(
+          __dirname,
+          `./uploads/${First_name}${extend_docx}`
+        );
+        //Path where the converted pdf will be placed/uploaded
+        const upload_path = path.join(
+          __dirname,
+          `./uploads/${First_name}${extend_pdf}`
+        );
+        //Converter to convert docx to pdf -->docx-pdf is used
+        //If you want you can use any other converter
+        //For example -- libreoffice-convert or --awesome-unoconv
+        docxConverter(initialPath, upload_path, function (err, result) {
+          if (err) {
+            console.log(err);
+          }
+          console.log("result" + result);
+          res.sendFile(__dirname + "/down_html.html");
+        });
       }
-      console.log("result" + result);
-      res.sendFile(__dirname + "/down_html.html");
     });
-
-    // file.mv(uploadpath, function (err) {
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     //Path of the downloaded or uploaded file
-    //     const initialPath = path.join(
-    //       __dirname,
-    //       `./uploads/${First_name}${extend_docx}`
-    //     );
-    //     //Path where the converted pdf will be placed/uploaded
-    //     const upload_path = path.join(
-    //       __dirname,
-    //       `./uploads/${First_name}${extend_pdf}`
-    //     );
-    //     //Converter to convert docx to pdf -->docx-pdf is used
-    //     //If you want you can use any other converter
-    //     //For example -- libreoffice-convert or --awesome-unoconv
-    //     docxConverter(initialPath, upload_path, function (err, result) {
-    //       if (err) {
-    //         console.log(err);
-    //       }
-    //       console.log("result" + result);
-    //       res.sendFile(__dirname + "/down_html.html");
-    //     });
-    //   }
-    // });
   } else {
+    res.send("No File selected !");
+    res.end();
   }
-  res.send("No File selected !");
-  res.end();
 });
+
+// app.post("/upload", upload.single("file"), function (req, res) {
+//   console.log(req);
+//   if (req.file) {
+//     const file = req.file,
+//       name = file.originalname,
+//       type = file.mimetype;
+
+//     //File where .docx will be downloaded
+//     const uploadpath = __dirname + "/file/doc" + name;
+//     //Name of the file --ex test,example
+//     const First_name = name.split(".")[0];
+//     //Name to download the file
+//     down_name = First_name;
+
+//     //Path of the downloaded or uploaded file
+//     const initialPath = path.join(
+//       __dirname,
+//       `./uploads/${First_name}${extend_docx}`
+//     );
+//     //Path where the converted pdf will be placed/uploaded
+//     const upload_path = path.join(
+//       __dirname,
+//       `./uploads/${First_name}${extend_pdf}`
+//     );
+
+//     docxConverter(initialPath, uploadpath, function (err, result) {
+//       if (err) {
+//         console.log(err);
+//       }
+//       console.log("result" + result);
+//       res.sendFile(__dirname + "/down_html.html");
+//     });
+
+// file.mv(uploadpath, function (err) {
+//   if (err) {
+//     console.log(err);
+//   } else {
+//     //Path of the downloaded or uploaded file
+//     const initialPath = path.join(
+//       __dirname,
+//       `./uploads/${First_name}${extend_docx}`
+//     );
+//     //Path where the converted pdf will be placed/uploaded
+//     const upload_path = path.join(
+//       __dirname,
+//       `./uploads/${First_name}${extend_pdf}`
+//     );
+//     //Converter to convert docx to pdf -->docx-pdf is used
+//     //If you want you can use any other converter
+//     //For example -- libreoffice-convert or --awesome-unoconv
+//     docxConverter(initialPath, upload_path, function (err, result) {
+//       if (err) {
+//         console.log(err);
+//       }
+//       console.log("result" + result);
+//       res.sendFile(__dirname + "/down_html.html");
+//     });
+//   }
+// });
+// } else {
+// }
+// res.send("No File selected !");
+// res.end();
+// });
 
 // app.post("/upload", upload.single("file"), (req, res) => {
 //   // fs.access("./files/doc", (error) => {
