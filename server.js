@@ -32,8 +32,8 @@ app.use(express.json());
 
 app.get("/downloadPdf", (req, res) => {
   const fileName = fs.readdirSync(path.resolve(__dirname, "files/doc"));
+  console.log(fileName);
   const pathToDoc = path.join(__dirname, `/files/doc/${fileName[0]}`);
-
   const file = fs.readFileSync(pathToDoc);
   if (!file) {
     return console.log("no file found");
@@ -74,8 +74,8 @@ app.post("/upload", upload.single("file"), (req, res) => {
 });
 
 app.post("/sendByEmail", (req, res) => {
-  const fileName = fileArr[0].split(".")[0];
-  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
+  const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[1]}`);
   attachment = fs.readFileSync(pathToPdf);
   console.log(attachment);
   const { emailAddress } = req.body;
