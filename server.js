@@ -15,9 +15,8 @@ sg.setApiKey(process.env.SG_KEY);
 const app = express();
 const port = 8000;
 
-const pathTo = path.resolve(__dirname, "files/doc");
-const fileArr = fs.readdirSync(pathTo);
-console.log(fileArr);
+// const pathTo = path.resolve(__dirname, "files/doc");
+// const fileArr = fs.readdirSync(pathTo);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -51,17 +50,8 @@ app.post("/upload", upload.single("file"), (req, res) => {
   //   if (error) {
   //     fs.mkdirSync("./files/doc");
   //   }
-  //   upload(req, res, function (err) {
-  //     if (err instanceof multer.MulterError) {
-  //       return res.status(500).json(err);
-  //     } else if (err) {
-  //       return res.status(500).json(err);
-  //     }
-  //     res.status(200).send(req.file);
-  //   });
-  // });
-  const file = fs.readFileSync(req.file.path);
-  if (file) {
+  if (req.file !== undefined) {
+    const file = fs.readFileSync(req.file.path);
     fs.readdir(path.join(__dirname, `/files/pdf/`), function (err, data) {
       if (data.length == 0) {
         return console.log("Directory is empty!");
@@ -80,46 +70,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
         fs.writeFileSync(pathToPdf, done);
         res.send(done);
       });
-    });
-  }
-});
-
-app.post("/upload", function (req, res) {
-  if (req.files.upfile) {
-    (name = file.name), (type = file.mimetype);
-    //File where .docx will be downloaded
-    var uploadpath = __dirname + "/uploads/" + name;
-    //Name of the file --ex test,example
-    const First_name = name.split(".")[0];
-    //Name to download the file
-    down_name = First_name;
-    //.mv function will be used to move the uploaded file to the
-    //upload folder temporarily
-    file.mv(uploadpath, function (err) {
-      if (err) {
-        console.log(err);
-      } else {
-        //Path of the downloaded or uploaded file
-        var initialPath = path.join(
-          __dirname,
-          `./uploads/${First_name}${extend_docx}`
-        );
-        //Path where the converted pdf will be placed/uploaded
-        var upload_path = path.join(
-          __dirname,
-          `./uploads/${First_name}${extend_pdf}`
-        );
-        //Converter to convert docx to pdf -->docx-pdf is used
-        //If you want you can use any other converter
-        //For example -- libreoffice-convert or --awesome-unoconv
-        docxConverter(initialPath, upload_path, function (err, result) {
-          if (err) {
-            console.log(err);
-          }
-          console.log("result" + result);
-          res.sendFile(__dirname + "/down_html.html");
-        });
-      }
     });
   } else {
     res.send("No File selected !");
