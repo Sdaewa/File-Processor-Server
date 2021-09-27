@@ -7,6 +7,7 @@ const libre = require("libreoffice-convert");
 const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
+const mv = require("mv");
 
 require("dotenv").config({ path: ".env" });
 sg.setApiKey(process.env.SG_KEY);
@@ -43,8 +44,9 @@ app.get("/downloadPdf", (req, res) => {
   res.send(file);
 });
 
-app.post("/upload", function (req, res) {
-  if (req.files.upfile) {
+app.post("/upload", upload.single("file"), function (req, res) {
+  console.log(req.file);
+  if (req.file) {
     var file = req.files.upfile,
       name = file.name,
       type = file.mimetype;
@@ -83,9 +85,9 @@ app.post("/upload", function (req, res) {
       }
     });
   } else {
-    res.send("No File selected !");
-    res.end();
   }
+  res.send("No File selected !");
+  res.end();
 });
 
 // app.post("/upload", upload.single("file"), (req, res) => {
