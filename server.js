@@ -32,11 +32,7 @@ app.use(express.json());
 
 app.get("/downloadPdf", (req, res) => {
   const fileName = fs.readdirSync(path.resolve(__dirname, "files/doc"));
-  console.log(fileName[0]);
-  const pathToDoc = path.join(
-    __dirname,
-    `/files/doc/${fileName[0].split(".")[0]}.doc`
-  );
+  const pathToDoc = path.join(__dirname, `/files/doc/${fileName[0]}`);
 
   const file = fs.readFileSync(pathToDoc);
   if (!file) {
@@ -46,7 +42,6 @@ app.get("/downloadPdf", (req, res) => {
 });
 
 app.post("/upload", upload.single("file"), (req, res) => {
-  console.log(req.file);
   // fs.access("./files/doc", (error) => {
   //   if (error) {
   //     fs.mkdirSync("./files/doc");
