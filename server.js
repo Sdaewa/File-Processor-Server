@@ -15,9 +15,6 @@ sg.setApiKey(process.env.SG_KEY);
 const app = express();
 const port = 8000;
 
-// const pathTo = path.resolve(__dirname, "files/doc");
-// const fileArr = fs.readdirSync(pathTo);
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "files/doc");
@@ -34,8 +31,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get("/downloadPdf", (req, res) => {
-  const fileName = fileArr[0].split(".")[0];
-  const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
+  const fileName = fs.readdirSync(path.resolve(__dirname, "files/doc"));
+  console.log(fileName[0]);
+  const pathToDoc = path.join(
+    __dirname,
+    `/files/doc/${fileName[0].split(".")[0]}.doc`
+  );
 
   const file = fs.readFileSync(pathToDoc);
   if (!file) {
