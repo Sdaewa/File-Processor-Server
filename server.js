@@ -126,9 +126,10 @@ app.post("/sendByEmail", (req, res) => {
 });
 
 app.get("/convertToMin", (req, res) => {
-  const fileName = fileArr[0].split(".")[0];
-  const pathToPdf = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
-  const pathToMin = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
+  console.log(req);
+  const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[0]}`);
+  const pathToMin = path.join(__dirname, `/files/minPdf/${fileName[0]}`);
 
   let reqOptions = {
     uri: process.env.PDF_CO_URL,
@@ -145,14 +146,17 @@ app.get("/convertToMin", (req, res) => {
     let data = JSON.parse(body);
     if (data.error == false) {
       // Download PDF file
-      var file = fs.createWriteStream(pathToPdf);
+      const file = fs.createWriteStream(pathToPdf);
       https.get(data.url, (response2) => {
         response2.pipe(file).on("close", () => {
           console.log(`Generated PDF file saved as "${pathToMin}" file.`);
         });
+        fs.unlinkSync(pathToPdf);
+        fs.unlinkSync(pathToMin);
       });
     } else {
       // Service reported error
+
       console.log("Error: " + data.message);
       // throw new Error({ error: data.message });
     }
