@@ -10,6 +10,7 @@ const https = require("https");
 
 require("dotenv").config({ path: ".env" });
 sg.setApiKey(process.env.SG_KEY);
+const PDF_URL = process.env.PDF_CO_URL;
 
 const app = express();
 const port = 8000;
@@ -94,7 +95,6 @@ app.post("/sendByEmail", (req, res) => {
   const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
   const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[1]}`);
   attachment = fs.readFileSync(pathToPdf);
-  console.log(attachment);
   const { emailAddress } = req.body;
 
   const msg = {
@@ -126,15 +126,13 @@ app.post("/sendByEmail", (req, res) => {
   // });
 });
 
-var query = process.env.PDF_CO_URL;
-
 app.get("/convertToMin", (req, res) => {
   const fileName = fileArr[0].split(".")[0];
   const pathToPdf = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
   const pathToMin = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
 
   let reqOptions = {
-    uri: query,
+    uri: PDF_URL,
     headers: { "x-api-key": process.env.API_KEY },
     formData: {
       name: path.basename(pathToPdf),
