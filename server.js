@@ -48,8 +48,9 @@ app.post("/upload", upload.single("file"), (req, res) => {
   //   }
   if (req.file !== undefined) {
     const file = fs.readFileSync(req.file.path);
-    fs.readdir(path.join(__dirname, `/files/pdf/`), function (err, data) {
+    fs.readdir(path.join(__dirname, `/files/doc/`), function (err, data) {
       if (data.length == 0) {
+        console.log(data);
         return console.log("Directory is empty!");
       }
       const extend = ".pdf";
@@ -115,8 +116,8 @@ app.post("/sendByEmail", (req, res) => {
   };
   sg.send(msg)
     .then((response) => {
-      res.sendStatus(response[0].statusCode);
       fs.unlinkSync(pathToPdf);
+      res.sendStatus(response[0].statusCode);
     })
     .catch((error) => {
       /* log friendly error */
