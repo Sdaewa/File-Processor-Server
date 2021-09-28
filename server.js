@@ -4,7 +4,6 @@ const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
 const libre = require("libreoffice-convert");
-var docxConverter = require("docx-pdf");
 const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
