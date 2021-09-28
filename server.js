@@ -55,6 +55,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
       const extend = ".pdf";
       const fileName = req.file.originalname.split(".")[0];
       const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
+      const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
 
       // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
       libre.convert(file, extend, undefined, (err, done) => {
@@ -65,12 +66,28 @@ app.post("/upload", upload.single("file"), (req, res) => {
         // Here in done you have pdf file which you can save or transfer in another stream
         fs.writeFileSync(pathToPdf, done);
         res.send(done);
+        fs.unlinkSync(pathToDoc);
       });
     });
   } else {
     res.send("No File selected !");
     res.end();
   }
+});
+
+app.post("/delete", (req, res) => {
+  const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[1]}`);
+  const thereIsFile = fs.existsSync(pathToPdf);
+
+  if (!thereIsFile) {
+    // res.sendStatus(404);
+    // throw new Error({
+    //   message: "Nothing to delete",
+    // });
+    return;
+  }
+  fs.unlinkSync(pathToPdf);
 });
 
 app.post("/sendByEmail", (req, res) => {
@@ -104,12 +121,6 @@ app.post("/sendByEmail", (req, res) => {
       /* log friendly error */
       console.error(error.toString());
       // throw new Error({ error: error });
-
-      /* extract error message */
-      // const { message, code, response } = error;
-
-      /* extract response message */
-      // const { headers, body } = response;
     });
   // });
 });
