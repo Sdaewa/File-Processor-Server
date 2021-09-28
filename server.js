@@ -10,7 +10,6 @@ const https = require("https");
 
 require("dotenv").config({ path: ".env" });
 sg.setApiKey(process.env.SG_KEY);
-const PDF_URL = process.env.PDF_CO_URL;
 
 const app = express();
 const port = 8000;
@@ -132,7 +131,7 @@ app.get("/convertToMin", (req, res) => {
   const pathToMin = path.join(__dirname, `/files/minPdf/${fileName}.pdf`);
 
   let reqOptions = {
-    uri: PDF_URL,
+    uri: process.env.PDF_CO_URL,
     headers: { "x-api-key": process.env.API_KEY },
     formData: {
       name: path.basename(pathToPdf),
