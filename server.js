@@ -31,13 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get("/downloadPdf", (req, res) => {
-  const fileName = fs.readdirSync(path.resolve(__dirname, "files/doc"));
-  console.log(fileName);
-  const pathToDoc = path.join(__dirname, `/files/doc/${fileName[0]}`);
-  const file = fs.readFileSync(pathToDoc);
+  const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[0]}`);
+  const file = fs.readFileSync(pathToPdf);
   if (!file) {
     return console.log("no file found");
   }
+  fs.unlinkSync(pathToPdf);
   res.send(file);
 });
 
@@ -116,6 +116,7 @@ app.post("/sendByEmail", (req, res) => {
   sg.send(msg)
     .then((response) => {
       res.sendStatus(response[0].statusCode);
+      fs.unlinkSync(pathToPdf);
     })
     .catch((error) => {
       /* log friendly error */
