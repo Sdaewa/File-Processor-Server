@@ -77,16 +77,17 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
 app.post("/delete", (req, res) => {
   const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
-  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[1]}`);
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[0]}`);
   const thereIsFile = fs.existsSync(pathToPdf);
 
   if (!thereIsFile) {
-    // res.sendStatus(404);
+    res.sendStatus(404);
     // throw new Error({
     //   message: "Nothing to delete",
     // });
     return;
   }
+  res.sendStatus(200);
   fs.unlinkSync(pathToPdf);
 });
 
@@ -146,13 +147,13 @@ app.get("/convertToMin", (req, res) => {
     let data = JSON.parse(body);
     if (data.error == false) {
       // Download PDF file
-      const file = fs.createWriteStream(pathToPdf);
+      const file = fs.createWriteStream(pathToMin);
       https.get(data.url, (response2) => {
         response2.pipe(file).on("close", () => {
           console.log(`Generated PDF file saved as "${pathToMin}" file.`);
         });
         fs.unlinkSync(pathToPdf);
-        fs.unlinkSync(pathToMin);
+        // fs.unlinkSync(pathToMin);
       });
     } else {
       // Service reported error
