@@ -7,6 +7,7 @@ const libre = require("libreoffice-convert");
 const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
+const MailGen = require("mailgen");
 
 require("dotenv").config({ path: ".env" });
 sg.setApiKey(process.env.SG_KEY);
@@ -92,8 +93,26 @@ app.post("/delete", (req, res) => {
 });
 
 app.post("/sendByEmail", (req, res) => {
+  const mailGenerator = new MailGen({
+    theme: "salted",
+    product: {
+      name: "PDF Processor",
+      link: "http://example.com",
+      // logo: your app logo url
+    },
+  });
+
+  const email = {
+    body: {
+      name: "User",
+      intro: "Welcome, find attached your PDF file",
+    },
+  };
+
+  const emailTemplate = mailGenerator.generate(email);
+  require("fs").writeFileSync("preview.html", emailTemplate, "utf8");
   const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
-  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[1]}`);
+  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[0]}`);
   attachment = fs.readFileSync(pathToPdf);
   const { emailAddress } = req.body;
 
@@ -102,11 +121,11 @@ app.post("/sendByEmail", (req, res) => {
     from: process.env.EMAIL,
     subject: "This is your PDF file 📄",
     text: "and easy to do anywhere, even with Node.js",
-    html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+    html: emailTemplate,
     attachments: [
       {
         content: attachment.toString("base64"),
-        filename: `${fileName}.pdf`,
+        filename: `${fileName}`,
         type: "application/pdf",
         disposition: "attachment",
         content_id: "mytext",
