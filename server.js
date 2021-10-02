@@ -97,8 +97,7 @@ app.post("/sendByEmail", (req, res) => {
     theme: "salted",
     product: {
       name: "PDF Processor",
-      link: "http://example.com",
-      // logo: your app logo url
+      link: "https://github.com/sdaewa",
     },
   });
 
