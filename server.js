@@ -42,10 +42,6 @@ app.get("/downloadPdf", (req, res) => {
 });
 
 app.post("/upload", upload.single("file"), (req, res) => {
-  // fs.access("./files/doc", (error) => {
-  //   if (error) {
-  //     fs.mkdirSync("./files/doc");
-  //   }
   if (req.file !== undefined) {
     const file = fs.readFileSync(req.file.path);
     fs.readdir(path.join(__dirname, `/files/doc/`), function (err, data) {
@@ -83,9 +79,6 @@ app.post("/delete", (req, res) => {
 
   if (!thereIsFile) {
     res.sendStatus(404);
-    // throw new Error({
-    //   message: "Nothing to delete",
-    // });
     return;
   }
   res.sendStatus(200);
