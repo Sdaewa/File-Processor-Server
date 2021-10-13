@@ -29,7 +29,10 @@ const fileFilter = (req, file, cb) => {
     file.mimetype === "application/msword" ||
     file.mimetype ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    file.mimetype === "application/vnd.apple.pages"
+    file.mimetype === "application/vnd.apple.pages" ||
+    file.mimetype ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    file.mimetype === "application/vnd.ms-excel"
   ) {
     cb(null, true);
   } else {
