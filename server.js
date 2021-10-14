@@ -14,6 +14,7 @@ sg.setApiKey(process.env.SG_KEY);
 
 const app = express();
 const port = 8000;
+const maxSize = 1 * 1000 * 1000;
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -40,7 +41,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: maxSize },
+});
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
