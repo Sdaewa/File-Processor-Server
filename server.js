@@ -58,8 +58,8 @@ app.get("/downloadPdf", (req, res) => {
   if (!file) {
     return console.log("no file found");
   }
-  fs.unlinkSync(pathToPdf);
-  res.send(file);
+  res.download(pathToPdf, fileName[0]);
+  // fs.unlinkSync(pathToPdf);
 });
 
 app.post("/upload", upload.single("file"), (req, res) => {
@@ -67,7 +67,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
     const file = fs.readFileSync(req.file.path);
     fs.readdir(path.join(__dirname, `/files/doc/`), function (err, data) {
       if (data.length == 0) {
-        console.log(data);
         return console.log("Directory is empty!");
       }
       const extend = ".pdf";
