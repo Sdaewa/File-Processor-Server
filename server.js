@@ -8,6 +8,11 @@ const request = require("request");
 const sg = require("@sendgrid/mail");
 const https = require("https");
 const MailGen = require("mailgen");
+const deleteRoutes = require("./routes/delete");
+const uploadRoutes = require("./routes/upload");
+const downloadRoutes = require("./routes/download");
+const minPdfRoutes = require("./routes/minPdf");
+const sendEmailRoutes = require("./routes/sendEmail");
 
 require("dotenv").config({ path: ".env" });
 sg.setApiKey(process.env.SG_KEY);
@@ -53,6 +58,43 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// app.use(deleteRoutes);
+app.use(uploadRoutes);
+// app.use(downloadRoutes);
+// app.use(minPdfRoutes);
+// app.use(sendEmailRoutes);
+
+// app.post("/upload", (req, res) => {
+//   if (req.file !== undefined) {
+//     const file = fs.readFileSync(req.file.path);
+//     fs.readdir(path.join(__dirname, `/files/doc/`), function (err, data) {
+//       console.log(path.join(__dirname, `/files/doc/`));
+//       if (data.length == 0) {
+//         return console.log("Directory is empty!");
+//       }
+//       const extend = ".pdf";
+//       const fileName = req.file.originalname.split(".")[0];
+//       const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
+//       const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
+
+//       // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+//       libre.convert(file, extend, undefined, (err, done) => {
+//         if (err) {
+//           console.log(`Error converting file: ${err}`);
+//           throw new Error({ error: error });
+//         }
+//         // Here in done you have pdf file which you can save or transfer in another stream
+//         fs.writeFileSync(pathToPdf, done);
+//         res.send(done);
+//         fs.unlinkSync(pathToDoc);
+//       });
+//     });
+//   } else {
+//     res.send("No File selected !");
+//     res.end();
+//   }
+// });
+
 app.get("/downloadPdf", (req, res) => {
   const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
   const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[0]}`);
@@ -64,36 +106,6 @@ app.get("/downloadPdf", (req, res) => {
   setTimeout(() => {
     fs.unlinkSync(pathToPdf);
   }, 2000);
-});
-
-app.post("/upload", (req, res) => {
-  if (req.file !== undefined) {
-    const file = fs.readFileSync(req.file.path);
-    fs.readdir(path.join(__dirname, `/files/doc/`), function (err, data) {
-      if (data.length == 0) {
-        return console.log("Directory is empty!");
-      }
-      const extend = ".pdf";
-      const fileName = req.file.originalname.split(".")[0];
-      const pathToPdf = path.join(__dirname, `/files/pdf/${fileName}.pdf`);
-      const pathToDoc = path.join(__dirname, `/files/doc/${fileName}.doc`);
-
-      // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-      libre.convert(file, extend, undefined, (err, done) => {
-        if (err) {
-          console.log(`Error converting file: ${err}`);
-          throw new Error({ error: error });
-        }
-        // Here in done you have pdf file which you can save or transfer in another stream
-        fs.writeFileSync(pathToPdf, done);
-        res.send(done);
-        fs.unlinkSync(pathToDoc);
-      });
-    });
-  } else {
-    res.send("No File selected !");
-    res.end();
-  }
 });
 
 app.post("/delete", (req, res) => {
