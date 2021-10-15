@@ -58,24 +58,11 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// app.use(deleteRoutes);
+app.use(deleteRoutes);
 app.use(uploadRoutes);
 app.use(downloadRoutes);
 // app.use(minPdfRoutes);
 // app.use(sendEmailRoutes);
-
-app.post("/delete", (req, res) => {
-  const fileName = fs.readdirSync(path.resolve(__dirname, "files/pdf"));
-  const pathToPdf = path.join(__dirname, `/files/pdf/${fileName[0]}`);
-  const thereIsFile = fs.existsSync(pathToPdf);
-
-  if (!thereIsFile) {
-    res.sendStatus(404);
-    return;
-  }
-  res.sendStatus(200);
-  fs.unlinkSync(pathToPdf);
-});
 
 app.post("/sendByEmail", (req, res) => {
   const mailGenerator = new MailGen({
