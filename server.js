@@ -41,11 +41,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: maxSize },
-});
+app.use(
+  multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: maxSize },
+  }).single("file")
+);
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -59,10 +61,12 @@ app.get("/downloadPdf", (req, res) => {
     return console.log("no file found");
   }
   res.download(pathToPdf, fileName[0]);
-  // fs.unlinkSync(pathToPdf);
+  setTimeout(() => {
+    fs.unlinkSync(pathToPdf);
+  }, 2000);
 });
 
-app.post("/upload", upload.single("file"), (req, res) => {
+app.post("/upload", (req, res) => {
   if (req.file !== undefined) {
     const file = fs.readFileSync(req.file.path);
     fs.readdir(path.join(__dirname, `/files/doc/`), function (err, data) {
