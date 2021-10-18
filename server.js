@@ -47,22 +47,9 @@ app.use(
   }).single("file")
 );
 
-// app.use(
-//   cors({
-//     origin: "*",
-//   })
-// );
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers");
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "POST, PUT, PATCH, GET, DELETE");
-    return res.status(200).json({});
-  }
-});
 
 app.use(uploadRoutes);
 app.use(downloadRoutes);
