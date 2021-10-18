@@ -47,8 +47,12 @@ app.use(
   }).single("file")
 );
 
-app.use(cors());
-app.use(express.urlencoded({ extended: false }));
+app.use(
+  cors({
+    origin: "*",
+  })
+);
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // app.use((req, res, next) => {
