@@ -10,8 +10,8 @@ const downloadRoutes = require("./routes/download");
 const minPdfRoutes = require("./routes/minPdf");
 const sendEmailRoutes = require("./routes/sendEmail");
 
+const port = process.env.PORT || 8080;
 const app = express();
-const port = 8000;
 const maxSize = 1 * 1000 * 1000;
 
 const storage = multer.diskStorage({
@@ -47,17 +47,20 @@ app.use(
   }).single("file")
 );
 
-app.use(cors());
+// app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested, Content-Type, Accept Authorization"
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "POST, PUT, PATCH, GET, DELETE");
+    return res.status(200).json({});
+  }
 });
 
 app.use(deleteRoutes);
@@ -66,4 +69,4 @@ app.use(downloadRoutes);
 app.use(minPdfRoutes);
 app.use(sendEmailRoutes);
 
-app.listen(process.env.PORT || 80, () => console.log("Server connected"));
+app.listen(port, () => console.log("Server connected"));
