@@ -63,10 +63,10 @@ app.use(express.json());
 //   }
 // });
 
-app.use(deleteRoutes);
 app.use(uploadRoutes);
 app.use(downloadRoutes);
 app.use(minPdfRoutes);
 app.use(sendEmailRoutes);
+app.use(deleteRoutes);
 
 app.listen(PORT, () => console.log(`Server connected in ${PORT}`));
