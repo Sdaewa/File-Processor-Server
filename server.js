@@ -67,4 +67,4 @@ app.use(downloadRoutes);
 app.use(minPdfRoutes);
 app.use(sendEmailRoutes);
 
-app.listen(process.env.BASE_URL, () => console.log("Server connected"));
+app.listen(process.env.PORT || 8080, () => console.log("Server connected"));
