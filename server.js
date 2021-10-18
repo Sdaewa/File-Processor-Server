@@ -57,14 +57,14 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Methods",
     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers");
   next();
 });
 
 app.use(deleteRoutes, next());
-app.use(uploadRoutes);
-app.use(downloadRoutes);
-app.use(minPdfRoutes);
-app.use(sendEmailRoutes);
+app.use(uploadRoutes, next());
+app.use(downloadRoutes, next());
+app.use(minPdfRoutes, next());
+app.use(sendEmailRoutes, next());
 
 app.listen(process.env.PORT || 80, () => console.log("Server connected"));
