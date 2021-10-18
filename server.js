@@ -10,7 +10,7 @@ const downloadRoutes = require("./routes/download");
 const minPdfRoutes = require("./routes/minPdf");
 const sendEmailRoutes = require("./routes/sendEmail");
 
-const port = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;
 const app = express();
 const maxSize = 1 * 1000 * 1000;
 
@@ -69,4 +69,4 @@ app.use(downloadRoutes);
 app.use(minPdfRoutes);
 app.use(sendEmailRoutes);
 
-app.listen(port, () => console.log("Server connected"));
+app.listen(PORT, () => console.log(`Server connected in ${PORT}`));
