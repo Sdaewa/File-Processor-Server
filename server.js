@@ -2,6 +2,8 @@ const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
 
+require("dotenv").config({ path: ".env" });
+
 const deleteRoutes = require("./routes/delete");
 const uploadRoutes = require("./routes/upload");
 const downloadRoutes = require("./routes/download");
@@ -65,4 +67,4 @@ app.use(downloadRoutes);
 app.use(minPdfRoutes);
 app.use(sendEmailRoutes);
 
-app.listen(port, () => console.log("Server connected"));
+app.listen(process.env.BASE_URL, () => console.log("Server connected"));
