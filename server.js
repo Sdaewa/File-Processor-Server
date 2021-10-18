@@ -61,7 +61,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(deleteRoutes);
+app.use(deleteRoutes, next());
 app.use(uploadRoutes);
 app.use(downloadRoutes);
 app.use(minPdfRoutes);
