@@ -1,8 +1,10 @@
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
+const aws = require("aws-sdk");
 
 require("dotenv").config({ path: ".env" });
+aws.config.region = "us-east-1";
 
 const deleteRoutes = require("./routes/delete");
 const uploadRoutes = require("./routes/upload");
@@ -13,6 +15,7 @@ const sendEmailRoutes = require("./routes/sendEmail");
 const PORT = process.env.PORT || 8080;
 const app = express();
 const maxSize = 1 * 1000 * 1000;
+const S3_BUCKET = process.env.S3_BUCKET;
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
