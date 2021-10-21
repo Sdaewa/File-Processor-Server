@@ -1,10 +1,10 @@
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
-const aws = require("aws-sdk");
+// const aws = require("aws-sdk");
+// var multerS3 = require("multer-s3");
 
 require("dotenv").config({ path: ".env" });
-aws.config.region = "us-east-1";
 
 const deleteRoutes = require("./routes/delete");
 const uploadRoutes = require("./routes/upload");
@@ -14,8 +14,14 @@ const sendEmailRoutes = require("./routes/sendEmail");
 
 const PORT = process.env.PORT || 8080;
 const app = express();
-const maxSize = 1 * 1000 * 1000;
-const S3_BUCKET = process.env.S3_BUCKET;
+// const S3_BUCKET = process.env.S3_BUCKET;
+
+// const s3Config = new aws.S3({
+//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+//   Bucket: S3_BUCKET,
+//   region: "us-east-1",
+// });
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -25,6 +31,18 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   },
 });
+
+// const multerS3Config = multerS3({
+//   s3: s3Config,
+//   bucket: process.env.S3_BUCKET,
+//   metadata: function (req, file, cb) {
+//     cb(null, { fieldName: file.fieldname });
+//   },
+//   key: function (req, file, cb) {
+//     console.log(file);
+//     cb(null, new Date().toISOString() + "-" + file.originalname);
+//   },
+// });
 
 const fileFilter = (req, file, cb) => {
   if (
@@ -46,11 +64,13 @@ app.use(
   multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: maxSize },
+    limits: {
+      fileSize: 1024 * 1024 * 5,
+    },
   }).single("file")
 );
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
