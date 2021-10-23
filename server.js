@@ -1,6 +1,9 @@
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
+const os = require("os");
+const path = require("path");
+const fs = require("fs");
 // const aws = require("aws-sdk");
 // var multerS3 = require("multer-s3");
 
@@ -22,10 +25,12 @@ const app = express();
 //   Bucket: S3_BUCKET,
 //   region: "us-east-1",
 // });
+const appPrefix = "temp-";
+tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), appPrefix));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "files/doc");
+    cb(null, tmpDir);
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
