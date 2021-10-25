@@ -1,8 +1,9 @@
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
-// const aws = require("aws-sdk");
-// var multerS3 = require("multer-s3");
+const os = require("os");
+const path = require("path");
+const fs = require("fs");
 
 require("dotenv").config({ path: ".env" });
 
@@ -14,35 +15,17 @@ const sendEmailRoutes = require("./routes/sendEmail");
 
 const PORT = process.env.PORT || 8080;
 const app = express();
-// const S3_BUCKET = process.env.S3_BUCKET;
-
-// const s3Config = new aws.S3({
-//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-//   Bucket: S3_BUCKET,
-//   region: "us-east-1",
-// });
+const prex = "temp-";
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prex));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "files/doc");
+    cb(null, tmpDir);
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
   },
 });
-
-// const multerS3Config = multerS3({
-//   s3: s3Config,
-//   bucket: process.env.S3_BUCKET,
-//   metadata: function (req, file, cb) {
-//     cb(null, { fieldName: file.fieldname });
-//   },
-//   key: function (req, file, cb) {
-//     console.log(file);
-//     cb(null, new Date().toISOString() + "-" + file.originalname);
-//   },
-// });
 
 const fileFilter = (req, file, cb) => {
   if (
