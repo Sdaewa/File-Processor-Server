@@ -10,7 +10,8 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-exports.upload = (req, res) => {
+exports.upload = async (req, res) => {
+  console.log(req.params);
   if (req.file !== undefined) {
     const file = fs.readFileSync(req.file.path);
 
@@ -21,27 +22,24 @@ exports.upload = (req, res) => {
         console.log(`Error converting file: ${err}`);
         throw new Error({ error: error });
       }
-
-      const buffer = Buffer.from(done);
-      const fileString = buffer.toString("base64");
-      const imageData = `data:image/jpeg;base64,${fileString}`;
-      cloudinary.uploader
-        .upload(imageData)
-        .then((result) => {
-          console.log("succes");
-          response.status(200).send({
-            message: "success",
-            result,
-          });
-        })
-        .catch((error) => {
-          response.status(500).send({
-            message: "failure",
-            error,
-          });
-        });
-      res.send(done);
     });
+    // const buffer = Buffer.from(done);
+    // const fileString = buffer.toString("base64");
+    // const imageData = `data:image/jpeg;base64,${fileString}`;
+    // cloudinary.uploader
+    //   .upload(imageData)
+    //   .then((res) => {
+    //     return response.status(200).send({
+    //       message: "succesdsdsss",
+    //       id_file: res.public,
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     response.status(500).send({
+    //       message: "failure",
+    //       error,
+    //     });
+    //   });
   } else {
     res.send("No File selected !");
     res.end();
