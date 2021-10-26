@@ -23,9 +23,9 @@ exports.upload = (req, res) => {
       }
       const buffer = Buffer.from(done);
       const fileString = buffer.toString("base64");
-      const imageData = `data:image/jpeg;base64,${fileString}`;
+      const docData = `data:image/jpeg;base64,${fileString}`;
       cloudinary.uploader
-        .upload(imageData)
+        .upload(docData)
         .then((res) => {
           return response.status(200).send({
             message: "succes",
