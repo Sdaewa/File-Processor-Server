@@ -9,30 +9,23 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-cloudinary.api.resources(function (error, result) {
-  console.log(result);
+cloudinary.api.resources(function (error, res) {
+  console.log(res);
 });
 
 exports.downloadPdf = (req, res) => {
-  cloudinary.api.resources(function (error, result) {
-    console.log(result);
-    if (!result.resources[0].url) {
+  cloudinary.api.resources(function (error, res) {
+    if (!res.resources[0].url) {
       return console.log("no file found");
     }
-    const url = result.resources[0].url;
+    const url = res.resources[0].url;
     axios
       .get(url, { responseType: "arraybuffer" })
-      .then((result) => {
-        console.log("url", result.config.url);
-        const buffer = Buffer.from(result.config.url, "utf-8");
-        const fileString = buffer.toString("base64");
-        const pdfData = `data:image/jpeg;base64,${fileString}`;
-        console.log("pdf", pdfData);
+      .then((res) => {
+        res.send(res.data);
       })
       .catch((err) => {
-        console.log(err);
+        res.send(err);
       });
-
-    res.download(pdfData);
   });
 };

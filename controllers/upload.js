@@ -38,7 +38,7 @@ exports.upload = (req, res) => {
             error,
           });
         });
-      res.send(done);
+      res.status(200).send();
     });
   } else {
     res.send("No File selected !");
