@@ -9,14 +9,10 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-cloudinary.api.resources(function (error, res) {
-  console.log(res);
-});
-
 exports.downloadPdf = (req, res) => {
-  cloudinary.api.resources(function (error, res) {
-    if (!res.resources[0].url) {
-      return console.log("no file found");
+  cloudinary.api.resources(function (err, res) {
+    if (err) {
+      return console.log(err);
     }
     const url = res.resources[0].url;
     axios
