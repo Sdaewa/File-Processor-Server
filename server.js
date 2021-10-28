@@ -17,6 +17,12 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 const prex = "temp-";
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prex));
+const dir = "./database/temp";
+if (!fs.existsSync(tmpDir)) {
+  fs.mkdirSync(dir, {
+    recursive: true,
+  });
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -42,16 +48,6 @@ const fileFilter = (req, file, cb) => {
     cb(null, false);
   }
 };
-
-app.use(
-  multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-      fileSize: 1024 * 1024 * 5,
-    },
-  }).single("file")
-);
 
 app.use(cors({ origin: "*" }));
 app.use(express.urlencoded({ extended: true }));
