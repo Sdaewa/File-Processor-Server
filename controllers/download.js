@@ -1,10 +1,7 @@
-const os = require("os");
-const fs = require("fs");
+const axios = require("axios");
 const cloudinary = require("cloudinary").v2;
 
 require("dotenv").config({ path: ".env" });
-
-const path = require("path");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -13,12 +10,18 @@ cloudinary.config({
 });
 
 exports.downloadPdf = (req, res) => {
-  cloudinary.api.resources(function (error, result) {
-    console.log(result.resources[0].url);
-
-    if (!result.resources[0].url) {
-      return console.log("no file found");
+  cloudinary.api.resources(function (err, res) {
+    if (err) {
+      return console.log(err);
     }
-    res.download(result.resources[0].url);
+    const url = res.resources[0].url;
+    axios
+      .get(url, { responseType: "arraybuffer" })
+      .then((res) => {
+        res.send(res.data);
+      })
+      .catch((err) => {
+        res.send(err);
+      });
   });
 };
