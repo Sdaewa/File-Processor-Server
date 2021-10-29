@@ -11,8 +11,9 @@ cloudinary.config({
 });
 
 exports.upload = (req, res) => {
-  if (req.file !== undefined) {
-    const file = fs.readFileSync(req.file.path);
+  console.log(req.body.data);
+  if (req.body !== undefined) {
+    const file = fs.readFileSync(req.body.data);
 
     const extend = ".pdf";
     // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)

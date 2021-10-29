@@ -50,8 +50,8 @@ const fileFilter = (req, file, cb) => {
 };
 
 app.use(cors({ origin: "*" }));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: "10mb", extended: true }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.use(uploadRoutes);
 app.use(downloadRoutes);
