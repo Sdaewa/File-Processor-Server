@@ -4,21 +4,23 @@ const { cloudinary } = require("../utils/cloudinary");
 require("dotenv").config({ path: ".env" });
 
 exports.upload = (req, res) => {
-  if (req.body.data !== undefined) {
-    const file = req.body.data;
+  if (req.file !== undefined) {
+    const file = req.file.buffer;
 
-    const extend = ".pdf";
     // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+    const extend = ".pdf";
     libre.convert(file, extend, undefined, (err, data) => {
       if (err) {
         console.log(`Error converting file: ${err}`);
-        throw new Error({ error: error });
       }
-      const buffer = Buffer.from(data);
-      const fileString = buffer.toString("base64");
-      const docData = `data:image/jpeg;base64,${fileString}`;
+
+      const fileString = data.toString("base64");
+      const pdfData = `data:application/pdf;base64,${fileString}`;
+      console.log(pdfData);
       cloudinary.uploader
-        .upload(docData)
+        .upload(pdfData, {
+          folder: "processor",
+        })
         .then((res) => {
           return response.status(200).send({
             message: "success",
@@ -31,7 +33,7 @@ exports.upload = (req, res) => {
             error,
           });
         });
-      res.status(200).send();
+      res.status(200).send(data);
     });
   } else {
     res.status(500).send();
