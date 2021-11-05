@@ -16,7 +16,6 @@ exports.upload = (req, res) => {
 
       const fileString = data.toString("base64");
       const pdfData = `data:application/pdf;base64,${fileString}`;
-      console.log(pdfData);
       cloudinary.uploader
         .upload(pdfData, {
           folder: "processor",
