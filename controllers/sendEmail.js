@@ -3,6 +3,8 @@ const sg = require("@sendgrid/mail");
 
 require("dotenv").config({ path: ".env" });
 
+const { cloudinary } = require("../utils/cloudinary");
+
 sg.setApiKey(process.env.SG_KEY);
 
 exports.sendByEmail = (req, res) => {

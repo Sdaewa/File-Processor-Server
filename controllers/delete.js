@@ -1,12 +1,6 @@
-const cloudinary = require("cloudinary").v2;
+const { cloudinary } = require("../utils/cloudinary");
 
 require("dotenv").config({ path: ".env" });
-
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
-});
 
 exports.delete = (req, res) => {
   cloudinary.api.resources(function (err, res) {
