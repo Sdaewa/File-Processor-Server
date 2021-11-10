@@ -1,3 +1,4 @@
+const MailGen = require("mailgen");
 const request = require("request").defaults({ encoding: null });
 const sg = require("@sendgrid/mail");
 
@@ -5,9 +6,19 @@ require("dotenv").config({ path: ".env" });
 
 const { cloudinary } = require("../utils/cloudinary");
 
+// console.log(fileData);
+
 sg.setApiKey(process.env.SG_KEY);
 
 exports.sendByEmail = (req, res) => {
+  const mailGenerator = new MailGen({
+    theme: "salted",
+    product: {
+      name: "PDF Processor",
+      link: "https://github.com/sdaewa",
+    },
+  });
+
   const email = {
     body: {
       name: "User",
@@ -51,4 +62,6 @@ exports.sendByEmail = (req, res) => {
       console.log(err);
       res.send(err);
     });
+
+  // });
 };
