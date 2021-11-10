@@ -17,7 +17,7 @@ exports.convertToMin = (req, res) => {
           "pdf"
         )
         .then(function (result) {
-          return res.status(200).send({ data: result.response.Files[0].Url });
+          return res.status(200).send({ url: result.response.Files[0].Url });
         });
     })
     .catch((err) => {
