@@ -1,4 +1,7 @@
-const request = require("request");
+const request = require("request").defaults({
+  encoding: null,
+});
+const convertapi = require("convertapi")(process.env.CONVERT_API);
 const https = require("https");
 const axios = require("axios");
 const { cloudinary } = require("../utils/cloudinary");
@@ -11,41 +14,21 @@ exports.convertToMin = (req, res) => {
     .then((result) => {
       const url = result.resources[0].url;
 
-      var request = require("request").defaults({
-        encoding: null,
-      });
-      request.get(url, function (err, res, body) {
-        let reqOptions = {
-          uri: process.env.PDF_CO_URL,
-          headers: { "x-api-key": process.env.API_KEY },
-          formData: {
-            name: "minPDf/pdf",
-            file: body,
+      // request.get(url, function (err, res, body) {
+      convertapi
+        .convert(
+          "compress",
+          {
+            File: url,
           },
-        };
-        // Send request
-        request.post(reqOptions, function (error, res, body) {
-          // Parse JSON response
-          if (!error) {
-            console.log(error);
-
-            // // Download PDF file
-
-            axios.get(body, (response2) => {
-              console.log(response2);
-              // response2.pipe(file).on("close", () => {
-              // console.log(`Generated PDF file saved as "${pathToMin}" file.`);
-              // });
-            });
-          } else {
-            // Service reported error
-            console.log("Error: " + data.message);
-            // throw new Error({ error: data.message });
-          }
+          "pdf"
+        )
+        .then(function (result) {
+          // result.saveFiles("/path/to/dir");
+          console.log(result.response);
+          // res.status(200).send({ data: result.response });
         });
-      });
-
-      res.status(200).send({ url: result.resources[0].url });
+      // });
     })
     .catch((err) => {
       console.log(err);
