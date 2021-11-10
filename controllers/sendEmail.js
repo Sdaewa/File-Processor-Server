@@ -1,12 +1,9 @@
-const MailGen = require("mailgen");
 const request = require("request").defaults({ encoding: null });
 const sg = require("@sendgrid/mail");
 
 require("dotenv").config({ path: ".env" });
 
 const { cloudinary } = require("../utils/cloudinary");
-
-// console.log(fileData);
 
 sg.setApiKey(process.env.SG_KEY);
 
