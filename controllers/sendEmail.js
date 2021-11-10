@@ -11,14 +11,6 @@ const { cloudinary } = require("../utils/cloudinary");
 sg.setApiKey(process.env.SG_KEY);
 
 exports.sendByEmail = (req, res) => {
-  const mailGenerator = new MailGen({
-    theme: "salted",
-    product: {
-      name: "PDF Processor",
-      link: "https://github.com/sdaewa",
-    },
-  });
-
   const email = {
     body: {
       name: "User",
@@ -27,10 +19,6 @@ exports.sendByEmail = (req, res) => {
   };
 
   const emailTemplate = mailGenerator.generate(email);
-  // require("fs").writeFileSync("preview.html", emailTemplate, "utf8");
-  // const fileName = fs.readdirSync(path.resolve(__dirname, "../files/pdf"));
-  // const pathToPdf = path.join(__dirname, `../files/pdf/${fileName[0]}`);
-  // attachment = fs.readFileSync(pathToPdf);
   const { emailAddress } = req.body;
 
   cloudinary.api
@@ -54,21 +42,16 @@ exports.sendByEmail = (req, res) => {
             },
           ],
         };
-        sg.send(msg)
-          .then((response) => {
-            res.sendStatus(response[0].statusCode);
-          })
-          .catch((error) => {
-            /* log friendly error */
-            console.error(error.toString());
-            // throw new Error({ error: error });
-          });
+        sg.send(msg);
+      });
+    })
+    .then(() => {
+      res.status(200).json({
+        message: "Email sent successfully",
       });
     })
     .catch((err) => {
       console.log(err);
       res.send(err);
     });
-
-  // });
 };
