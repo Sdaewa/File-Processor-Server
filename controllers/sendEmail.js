@@ -6,8 +6,6 @@ require("dotenv").config({ path: ".env" });
 
 const { cloudinary } = require("../utils/cloudinary");
 
-// console.log(fileData);
-
 sg.setApiKey(process.env.SG_KEY);
 
 exports.sendByEmail = (req, res) => {
@@ -62,6 +60,4 @@ exports.sendByEmail = (req, res) => {
       console.log(err);
       res.send(err);
     });
-
-  // });
 };
