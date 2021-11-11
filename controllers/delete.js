@@ -7,7 +7,7 @@ exports.delete = (req, res) => {
     const public_id = res.resources[0].public_id;
     if (!public_id) {
       res.status(404).json({
-        message: "No images to delete",
+        message: "No files to delete",
       });
     }
     cloudinary.uploader.destroy(public_id, function (res) {});
