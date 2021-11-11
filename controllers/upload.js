@@ -13,7 +13,6 @@ exports.upload = (req, res) => {
       if (err) {
         console.log(`Error converting file: ${err}`);
       }
-      console.log(data);
       const fileString = data.toString("base64");
       const pdfData = `data:application/pdf;base64,${fileString}`;
       cloudinary.uploader
