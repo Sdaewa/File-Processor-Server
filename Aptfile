@@ -6,3 +6,7 @@ libharfbuzz0b
 libharfbuzz-icu0
 libx11-xcb1
 libxcb1
+
+:repo:deb http://http.us.debian.org/debian stretch main
+
+libreoffice
