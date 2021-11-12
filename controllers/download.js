@@ -1,4 +1,4 @@
-const { cloudinary } = require("./utils/cloudinary");
+const { cloudinary } = require("../utils/cloudinary");
 
 require("dotenv").config({ path: ".env" });
 
