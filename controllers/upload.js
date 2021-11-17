@@ -1,4 +1,4 @@
-const libre = require("libreoffice-convert");
+const convertapi = require("convertapi")(process.env.CONVERT_API);
 const { cloudinary } = require("../utils/cloudinary");
 
 require("dotenv").config({ path: ".env" });
@@ -6,33 +6,25 @@ require("dotenv").config({ path: ".env" });
 exports.upload = (req, res) => {
   if (req.file !== undefined) {
     const file = req.file.buffer;
+    const fileName = req.file.originalname;
+    const fileString = file.toString("base64");
+    const docData = `data:application/msword;base64,${fileString}`;
 
-    // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-    const extend = ".pdf";
-    libre.convert(file, extend, undefined, (err, data) => {
-      if (err) {
-        console.log(`Error converting file: ${err}`);
-      }
-      const fileString = data.toString("base64");
-      const pdfData = `data:application/pdf;base64,${fileString}`;
-      cloudinary.uploader
-        .upload(pdfData, {
-          folder: "processor",
-        })
-        .then((res) => {
-          return response.status(200).send({
-            message: "success",
-            res,
-          });
-        })
-        .catch((error) => {
-          response.status(500).send({
-            message: "failure",
-            error,
-          });
-        });
-      res.status(200).send(data);
-    });
+    cloudinary.uploader
+      .upload(docData, {
+        public_id: fileName,
+        resource_type: "raw",
+        // raw_convert: "aspose",
+      })
+      .then((res) => {
+        // cloudinary.url(res.public_id + ".pdf");
+        // console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    res.status(200).send();
   } else {
     res.status(500).send();
     res.end();

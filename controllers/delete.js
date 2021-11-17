@@ -10,7 +10,7 @@ exports.delete = (req, res) => {
         message: "No files to delete",
       });
     }
-    cloudinary.uploader.destroy(public_id, function (res) {});
+    cloudinary.uploader.destroy(public_id);
   });
   res.status(200).send();
 };
