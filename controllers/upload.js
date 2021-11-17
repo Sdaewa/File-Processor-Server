@@ -1,7 +1,12 @@
 const convertapi = require("convertapi")(process.env.CONVERT_API);
+const AWS = require("aws-sdk");
 const { cloudinary } = require("../utils/cloudinary");
 
 require("dotenv").config({ path: ".env" });
+
+const S3 = new AWS.S3({
+  credentials: process.env.AWS_ACCESS_KEY_ID,
+});
 
 exports.upload = (req, res) => {
   if (req.file !== undefined) {
