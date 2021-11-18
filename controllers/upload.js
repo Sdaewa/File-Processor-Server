@@ -24,15 +24,30 @@ exports.upload = (req, res) => {
       Body: file,
     };
 
-    S3.upload(params, (err, data) => {
-      if (err) {
-        res.status(500).send(err);
-      }
-      res.status(200).send(data);
-      console.log(data);
-    });
-
-    res.status(200).send();
+    S3.upload(params)
+      .promise()
+      .then((res) => {
+        return res.Location;
+      })
+      .then((url) => {
+        return convertapi.convert(
+          "pdf",
+          {
+            File: url,
+          },
+          "doc" || "docx"
+        );
+      })
+      .then((res) => {
+        const fileUrl = res.response.Files[0].Url;
+        cloudinary.uploader.upload(fileUrl, { folder: "processor" });
+      })
+      .then(() => {
+        return res.status(200).json({ message: "File uploaded successfully" });
+      })
+      .catch((err) => {
+        return res.status(400).json({ message: err.message });
+      });
   } else {
     res.status(500).send();
     res.end();
