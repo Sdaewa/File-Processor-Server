@@ -56,6 +56,17 @@ exports.sendByEmail = (req, res) => {
         message: "Email sent successfully",
       });
     })
+    .then(() => {
+      cloudinary.api.resources(function (err, res) {
+        const public_id = res.resources[0].public_id;
+        if (!public_id) {
+          res.status(404).json({
+            message: "No files to delete",
+          });
+        }
+        cloudinary.uploader.destroy(public_id);
+      });
+    })
     .catch((err) => {
       console.log(err);
       res.send(err);
